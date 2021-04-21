@@ -15,7 +15,7 @@ with open('data/pan20-authorship-verification-training-small.jsonl') as f:
         
 df = pd.DataFrame.from_dict(data)
 
-# HELLO MY NAME IS SEBASTIAN
+# HELLO MY NAME IS NOT SEBASTIAN
 #%%
 
 df = df.head(1000)
