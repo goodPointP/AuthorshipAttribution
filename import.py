@@ -2,7 +2,7 @@
 """
 Created on Tue Apr 13 14:53:06 2021
 
-@author: Group
+@author: Group2
 """
 
 import json
