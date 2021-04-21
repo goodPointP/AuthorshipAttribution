@@ -1,21 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 13 14:53:06 2021
-
-@author: Group2
-"""
-
+### import.py
 import json
 import pandas as pd
-
-data = []
-with open('data/pan20-authorship-verification-training-small.jsonl') as f:
-    for l in f:
-        data.append(json.loads(l.strip()))
-        
-df = pd.DataFrame.from_dict(data)
-
-# HELLO MY NAME IS NOT SEBASTIAN
-#%%
-
-df = df.head(1000)
+text = 'data/pan20-authorship-verification-training-small.jsonl'
+def textimport(text):
+    data = []
+    with open(text) as f:
+        for l in f:
+            data.append(json.loads(l.strip()))
+    return pd.DataFrame.from_dict(data)
