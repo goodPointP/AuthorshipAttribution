@@ -11,7 +11,7 @@ def textimport():
 
 def truthimport():
     data_truth = []
-    with open('pan20-authorship-verification-training-small-truth.jsonl') as f:
+    with open('data/pan20-authorship-verification-training-small-truth.jsonl') as f:
         for l in f:
             data_truth.append(json.loads(l.strip()))
     return pd.DataFrame.from_dict(data_truth)
