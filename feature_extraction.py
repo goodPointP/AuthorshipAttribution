@@ -117,7 +117,7 @@ def index_of_coincidence(text):
     # print(chances)
     # print(sum(chances))
     # ioc = sum(chances)/((len(text) * (len(text)-1)))
-    ioc = frequencySum / (N*(N-1)) * (normalizing_coef/(N*(N-1)))
+    ioc = frequencySum / (N*(N-1)) #* (normalizing_coef/(N*(N-1)))
     return ioc
 
 def combined(text, words, sentences):
@@ -193,7 +193,7 @@ def getFeatures(text):
 data = textimport_light(False)
 labels = truthimport_light()
 
-for index, row in enumerate(data[:10]):
+for index, row in enumerate(data):
     text1 = data[index]['pair'][0]
     text2 = data[index]['pair'][1]
     
@@ -202,8 +202,24 @@ for index, row in enumerate(data[:10]):
     
     data[index]['features'] = [combined(text1, words1, sentences1), combined(text2, words2, sentences2)]
 
-# for row in data[:10].iterrows():
-    # print(row[1][1])
+# with open ('data2289-withFeatures.pkl', 'wb') as f:
+#     pickle.dump(data,f)
+
+# with open('data2289-withFeatures.pkl', 'rb') as f:
+#    mynewlist = pickle.load(f)
+
+#%%
+X = []
+for index, row in enumerate(data):
+    X.append(data[index]['features'])
+
+Y = []
+Y = labels['same']
+
+#%%
+from sklearn.linear_model import Perceptron
+
+pcp = Perceptron()
 
 # trainX = df 
 # trainY = 
