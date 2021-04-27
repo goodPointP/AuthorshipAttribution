@@ -1,4 +1,4 @@
-from preprocessing import *
+from functions import *
 from nltk.probability import FreqDist
 import string
 import readability # pip install readability # #https://github.com/mmautner/readability/blob/master/readability.py
@@ -98,15 +98,36 @@ def special_characters(words):
                 spec_count += 1
     return spec_count
 
+def index_of_coincidence(text):
+    # TODO: REMOVE PUNCTUATION
+    normalizing_coef = 26.0 #26 for english
+    text = remove_punctuation(text)
+    text = remove_spaces(text)
+    text = text.upper()
+    
+    N = len(text)
+    
+    
+    # chances = []
+    frequencySum = 0.0
+    for letter in string.ascii_uppercase:
+        frequencySum += float(text.count(letter)) * (float(text.count(letter))-1)
+        # chances.append( (text.count(letter) * (text.count(letter)-1))/(len(text) * (len(text)-1)) )
+    
+    # print(chances)
+    # print(sum(chances))
+    # ioc = sum(chances)/((len(text) * (len(text)-1)))
+    ioc = frequencySum / (N*(N-1)) * (normalizing_coef/(N*(N-1)))
+    return ioc
 
 def combined(text, words, sentences):
-        
+    # print(text)
     int_or_float = np.array([avg_word_length(words),
                      avg_sentence_length(words, sentences), punctuation_ratio(text, words), 
                      TTR(words), hapax_legomena(words), readability_metrics(sentences)[0],
                      readability_metrics(sentences)[3],
                      digits(words), superlatives(words),
-                     special_characters(words)], dtype="object")
+                     special_characters(words), index_of_coincidence(text)], dtype="object")
     
     list_or_array = np.array([function_words(words), intensifier_words(words), 
                     time_adverbs(words), readability_metrics(sentences)[1],
