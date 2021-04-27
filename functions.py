@@ -4,6 +4,7 @@ import pandas as pd
 from nltk.tokenize import sent_tokenize, RegexpTokenizer
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
+import string
 
 def textimport():
     data = []
@@ -37,6 +38,12 @@ def remove_duplicates(dataframe):
     text_list = pd.Series(dataframe['pair'].explode())
     text_IDs, text_uniques = text_list.factorize()
     return text_IDs, text_uniques
+
+def remove_punctuation(text):
+    return text.translate(str.maketrans('', '', string.punctuation))
+
+def remove_spaces(text):
+    return text.replace(' ','')
 
 def tokenizer(text):
     word_tokenizer = RegexpTokenizer(r"\w+")
