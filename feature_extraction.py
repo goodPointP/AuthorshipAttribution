@@ -133,7 +133,7 @@ def combined(text, words, sentences):
                     time_adverbs(words), readability_metrics(sentences)[1],
                     readability_metrics(sentences)[2]], dtype="object")
     
-    return int_or_float, list_or_array
+    return [int_or_float, list_or_array]
 
 
 def vectorize(text1, text2):
@@ -178,14 +178,35 @@ def create_input_matrix(data_frame):
 
     return matrix
         
-df = textimport_light()[0:10]
-matrix = create_input_matrix(df)
+# df = textimport_light(True)[0:10]
+# matrix = create_input_matrix(df)
 
 #def exact_word_matches(words, words2):
  #   unique1 = set(words)
   #  unique2 = set(words2)
    # matches = len(unique1.intersection(unique2))
     #return matches
-    
 
+def getFeatures(text):
+    return features
+
+data = textimport_light(False)
+labels = truthimport_light()
+
+for index, row in enumerate(data[:10]):
+    text1 = data[index]['pair'][0]
+    text2 = data[index]['pair'][1]
+    
+    words1, sentences1 = tokenizer(text1)
+    words2, sentences2 = tokenizer(text2)
+    
+    data[index]['features'] = [combined(text1, words1, sentences1), combined(text2, words2, sentences2)]
+
+# for row in data[:10].iterrows():
+    # print(row[1][1])
+
+# trainX = df 
+# trainY = 
+# testX = 
+# testY = 
     
