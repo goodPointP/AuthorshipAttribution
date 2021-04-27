@@ -20,12 +20,15 @@ def truthimport():
             data_truth.append(json.loads(l.strip()))
     return pd.DataFrame.from_dict(data_truth)
 
-def textimport_light():
+def textimport_light(pandas_check = True):
     data = []
     with open('data/pan20-authorship-verification-training-small.jsonl') as f:
         for l in f.readlines(100000000):
             data.append(json.loads(l.strip()))
-    return pd.DataFrame.from_dict(data)
+    if (pandas_check):
+        return pd.DataFrame.from_dict(data)
+    else:
+        return data
 
 def truthimport_light():
     data_truth = []
