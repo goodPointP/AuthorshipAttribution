@@ -193,14 +193,14 @@ def getFeatures(text):
 data = textimport_light(False)
 labels = truthimport_light()
 
-for index, row in enumerate(data):
+for index, row in enumerate(data[:10]):
     text1 = data[index]['pair'][0]
     text2 = data[index]['pair'][1]
     
     words1, sentences1 = tokenizer(text1)
     words2, sentences2 = tokenizer(text2)
     
-    data[index]['features'] = [combined(text1, words1, sentences1), combined(text2, words2, sentences2)]
+    data[index]['features'] = [np.hstack((combined(text1, words1, sentences1))), np.hstack((combined(text2, words2, sentences2)))]
 
 # with open ('data2289-withFeatures.pkl', 'wb') as f:
 #     pickle.dump(data,f)
