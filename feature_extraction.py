@@ -1,4 +1,4 @@
-from preprocessing import *
+from functions import *
 from nltk.probability import FreqDist
 import string
 import readability # pip install readability # #https://github.com/mmautner/readability/blob/master/readability.py
@@ -98,21 +98,42 @@ def special_characters(words):
                 spec_count += 1
     return spec_count
 
+def index_of_coincidence(text):
+    # TODO: REMOVE PUNCTUATION
+    normalizing_coef = 26.0 #26 for english
+    text = remove_punctuation(text)
+    text = remove_spaces(text)
+    text = text.upper()
+    
+    N = len(text)
+    
+    
+    # chances = []
+    frequencySum = 0.0
+    for letter in string.ascii_uppercase:
+        frequencySum += float(text.count(letter)) * (float(text.count(letter))-1)
+        # chances.append( (text.count(letter) * (text.count(letter)-1))/(len(text) * (len(text)-1)) )
+    
+    # print(chances)
+    # print(sum(chances))
+    # ioc = sum(chances)/((len(text) * (len(text)-1)))
+    ioc = frequencySum / (N*(N-1)) #* (normalizing_coef/(N*(N-1)))
+    return ioc
 
 def combined(text, words, sentences):
-        
+    # print(text)
     int_or_float = np.array([avg_word_length(words),
                      avg_sentence_length(words, sentences), punctuation_ratio(text, words), 
                      TTR(words), hapax_legomena(words), readability_metrics(sentences)[0],
                      readability_metrics(sentences)[3],
                      digits(words), superlatives(words),
-                     special_characters(words)], dtype="object")
+                     special_characters(words), index_of_coincidence(text)], dtype="object")
     
     list_or_array = np.array([function_words(words), intensifier_words(words), 
                     time_adverbs(words), readability_metrics(sentences)[1],
                     readability_metrics(sentences)[2]], dtype="object")
     
-    return int_or_float, list_or_array
+    return [int_or_float, list_or_array]
 
 
 def vectorize(text1, text2):
@@ -157,14 +178,51 @@ def create_input_matrix(data_frame):
 
     return matrix
         
-df = textimport_light()[0:10]
-matrix = create_input_matrix(df)
+# df = textimport_light(True)[0:10]
+# matrix = create_input_matrix(df)
 
 #def exact_word_matches(words, words2):
  #   unique1 = set(words)
   #  unique2 = set(words2)
    # matches = len(unique1.intersection(unique2))
     #return matches
-    
 
+def getFeatures(text):
+    return features
+
+data = textimport_light(False)
+labels = truthimport_light()
+
+for index, row in enumerate(data[:10]):
+    text1 = data[index]['pair'][0]
+    text2 = data[index]['pair'][1]
+    
+    words1, sentences1 = tokenizer(text1)
+    words2, sentences2 = tokenizer(text2)
+    
+    data[index]['features'] = [np.hstack((combined(text1, words1, sentences1))), np.hstack((combined(text2, words2, sentences2)))]
+
+# with open ('data2289-withFeatures.pkl', 'wb') as f:
+#     pickle.dump(data,f)
+
+# with open('data2289-withFeatures.pkl', 'rb') as f:
+#    mynewlist = pickle.load(f)
+
+#%%
+X = []
+for index, row in enumerate(data):
+    X.append(data[index]['features'])
+
+Y = []
+Y = labels['same']
+
+#%%
+from sklearn.linear_model import Perceptron
+
+pcp = Perceptron()
+
+# trainX = df 
+# trainY = 
+# testX = 
+# testY = 
     

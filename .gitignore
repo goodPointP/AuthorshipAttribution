@@ -1,5 +1,10 @@
 data/pan20-authorship-verification-training-small.jsonl
 data/pan20-authorship-verification-training-small-truth.jsonl
+<<<<<<< HEAD
 data/intensifier_words.txt
 data/function_words.txt
 data/time_adverbs.txt
+=======
+data/dataShuffled.pkl
+data/labelsShuffled.pkl
+>>>>>>> 58b3971306168e8567adda2d3efd7947b476d460
