@@ -8,45 +8,37 @@ import pickle
 
 def read_data():
     with open('data/dataShuffled.pkl', 'rb') as f:
-        data = pickle.load(f)
-    return data
+        rawData = pickle.load(f)
+    return rawData
 
 def read_truth_data():
     with open('data/dataShuffled.pkl', 'rb') as f:
-        data = pickle.load(f)
-    return data
+        rawTruths = pickle.load(f)
+    return rawTruths
 
-def textimport(pandas_check = True):
-    if 'data' not in globals():
-        data = read_data()
+def textimport(rawData, pandas_check = True):
     if (pandas_check):
-        return pd.DataFrame.from_dict(data)
+        return pd.DataFrame.from_dict(rawData)
     else:
-        return list(data)
+        return list(rawData)
 
-def truthimport(pandas_check = True):
-    if 'data_truth' not in globals():
-        data_truth = read_data()
+def truthimport(rawTruths, pandas_check = True):
     if (pandas_check):
-        return pd.DataFrame.from_dict(data_truth)
+        return pd.DataFrame.from_dict(rawTruths)
     else:
-        return list(data_truth)
+        return list(rawTruths)
 
-def textimport_light(pandas_check = True):
-    if 'data' not in globals():
-        data = read_data()
+def textimport_light(rawData, pandas_check = True):
     if (pandas_check):
-        return pd.DataFrame.from_dict(data)
+        return pd.DataFrame.from_dict(rawData)
     else:
-        return list(data)[:2289]
+        return list(rawData)[:2289]
 
-def truthimport_light(pandas_check = True):
-    if 'data_truth' not in globals():
-        data_truth = read_data()
+def truthimport_light(rawTruths, pandas_check = True):
     if (pandas_check):
-        return pd.DataFrame.from_dict(data_truth)
+        return pd.DataFrame.from_dict(rawTruths)
     else:
-        return list(data_truth)[:2289]
+        return list(rawTruths)[:2289]
 
 def remove_duplicates(dataframe):
     text_list = pd.Series(dataframe['pair'].explode())
