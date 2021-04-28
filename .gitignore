@@ -1,2 +1,5 @@
 data/pan20-authorship-verification-training-small.jsonl
 data/pan20-authorship-verification-training-small-truth.jsonl
+data/intensifier_words.txt
+data/function_words.txt
+data/time_adverbs.txt
