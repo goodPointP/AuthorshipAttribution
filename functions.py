@@ -1,5 +1,4 @@
 ### import.py
-import json
 import pandas as pd
 from nltk.tokenize import sent_tokenize, RegexpTokenizer
 from sklearn.preprocessing import StandardScaler
@@ -7,47 +6,43 @@ from sklearn.model_selection import train_test_split
 import string
 import pickle
 
-def textimport(pandas_check = True):
+def read_data():
     with open('data/dataShuffled.pkl', 'rb') as f:
         data = pickle.load(f)
-    # with open('data/pan20-authorship-verification-training-small.jsonl') as f:
-    #     for l in f.readlines(100000000):
-    #         data.append(json.loads(l.strip()))
+    return data
+
+def read_truth_data():
+    with open('data/dataShuffled.pkl', 'rb') as f:
+        data = pickle.load(f)
+    return data
+
+def textimport(pandas_check = True):
+    if 'data' not in globals():
+        data = read_data()
     if (pandas_check):
         return pd.DataFrame.from_dict(data)
     else:
         return list(data)
 
 def truthimport(pandas_check = True):
-    data_truth = []
-    with open('data/labelsShuffled.pkl', 'rb') as f:
-        data_truth = pickle.load(f)
-    # with open('data/pan20-authorship-verification-training-small-truth.jsonl') as f:
-    #     for l in f:
-    #         data_truth.append(json.loads(l.strip()))
+    if 'data_truth' not in globals():
+        data_truth = read_data()
     if (pandas_check):
         return pd.DataFrame.from_dict(data_truth)
     else:
         return list(data_truth)
 
 def textimport_light(pandas_check = True):
-    with open('data/dataShuffled.pkl', 'rb') as f:
-        data = pickle.load(f)
-    # with open('data/pan20-authorship-verification-training-small.jsonl') as f:
-    #     for l in f.readlines(100000000):
-    #         data.append(json.loads(l.strip()))
+    if 'data' not in globals():
+        data = read_data()
     if (pandas_check):
         return pd.DataFrame.from_dict(data)
     else:
         return list(data)[:2289]
 
 def truthimport_light(pandas_check = True):
-    data_truth = []
-    with open('data/labelsShuffled.pkl', 'rb') as f:
-        data_truth = pickle.load(f)
-    # with open('data/pan20-authorship-verification-training-small-truth.jsonl') as f:
-    #     for l in f:
-    #         data_truth.append(json.loads(l.strip()))
+    if 'data_truth' not in globals():
+        data_truth = read_data()
     if (pandas_check):
         return pd.DataFrame.from_dict(data_truth)
     else:

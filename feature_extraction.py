@@ -210,8 +210,8 @@ for index, row in enumerate(data[:10]):
 
 #%%
 X = []
-for index, row in enumerate(data):
-    X.append(data[index]['features'])
+# for index, row in enumerate(data):
+    # X.append(data[index]['features'])
 
 Y = []
 Y = labels['same']
