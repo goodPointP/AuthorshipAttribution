@@ -1,5 +1,4 @@
 ### import.py
-import json
 import pandas as pd
 from nltk.tokenize import sent_tokenize, RegexpTokenizer
 from sklearn.preprocessing import StandardScaler
@@ -7,51 +6,39 @@ from sklearn.model_selection import train_test_split
 import string
 import pickle
 
-def textimport(pandas_check = True):
+def read_data():
     with open('data/dataShuffled.pkl', 'rb') as f:
-        data = pickle.load(f)
-    # with open('data/pan20-authorship-verification-training-small.jsonl') as f:
-    #     for l in f.readlines(100000000):
-    #         data.append(json.loads(l.strip()))
-    if (pandas_check):
-        return pd.DataFrame.from_dict(data)
-    else:
-        return list(data)
+        rawData = pickle.load(f)
+    return rawData
 
-def truthimport(pandas_check = True):
-    data_truth = []
-    with open('data/labelsShuffled.pkl', 'rb') as f:
-        data_truth = pickle.load(f)
-    # with open('data/pan20-authorship-verification-training-small-truth.jsonl') as f:
-    #     for l in f:
-    #         data_truth.append(json.loads(l.strip()))
-    if (pandas_check):
-        return pd.DataFrame.from_dict(data_truth)
-    else:
-        return list(data_truth)
-
-def textimport_light(pandas_check = True):
+def read_truth_data():
     with open('data/dataShuffled.pkl', 'rb') as f:
-        data = pickle.load(f)
-    # with open('data/pan20-authorship-verification-training-small.jsonl') as f:
-    #     for l in f.readlines(100000000):
-    #         data.append(json.loads(l.strip()))
-    if (pandas_check):
-        return pd.DataFrame.from_dict(data)
-    else:
-        return list(data)[:2289]
+        rawTruths = pickle.load(f)
+    return rawTruths
 
-def truthimport_light(pandas_check = True):
-    data_truth = []
-    with open('data/labelsShuffled.pkl', 'rb') as f:
-        data_truth = pickle.load(f)
-    # with open('data/pan20-authorship-verification-training-small-truth.jsonl') as f:
-    #     for l in f:
-    #         data_truth.append(json.loads(l.strip()))
+def textimport(rawData, pandas_check = True):
     if (pandas_check):
-        return pd.DataFrame.from_dict(data_truth)
+        return pd.DataFrame.from_dict(rawData)
     else:
-        return list(data_truth)[:2289]
+        return list(rawData)
+
+def truthimport(rawTruths, pandas_check = True):
+    if (pandas_check):
+        return pd.DataFrame.from_dict(rawTruths)
+    else:
+        return list(rawTruths)
+
+def textimport_light(rawData, pandas_check = True):
+    if (pandas_check):
+        return pd.DataFrame.from_dict(rawData)
+    else:
+        return list(rawData)[:2289]
+
+def truthimport_light(rawTruths, pandas_check = True):
+    if (pandas_check):
+        return pd.DataFrame.from_dict(rawTruths)
+    else:
+        return list(rawTruths)[:2289]
 
 def remove_duplicates(dataframe):
     text_list = pd.Series(dataframe['pair'].explode())

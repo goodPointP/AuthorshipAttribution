@@ -6,7 +6,13 @@ import pandas as pd
 import numpy as np
 from scipy import spatial
 
-    
+#%%
+# RUN ONLY ONCE
+# read the data
+rawData = read_data()
+rawTruths = read_truth_data()
+
+#%%
 def avg_word_length(words):
     return sum(len(word) for word in words) / len(words)
 
@@ -178,7 +184,7 @@ def create_input_matrix(data_frame):
 
     return matrix
         
-# df = textimport_light(True)[0:10]
+# df = textimport_light(rawData, True)[0:10]
 # matrix = create_input_matrix(df)
 
 #def exact_word_matches(words, words2):
@@ -190,8 +196,8 @@ def create_input_matrix(data_frame):
 def getFeatures(text):
     return features
 
-data = textimport_light(False)
-labels = truthimport_light()
+data = textimport_light(rawData, False)
+labels = truthimport_light(rawTruths)
 
 for index, row in enumerate(data[:10]):
     text1 = data[index]['pair'][0]
@@ -210,11 +216,11 @@ for index, row in enumerate(data[:10]):
 
 #%%
 X = []
-for index, row in enumerate(data):
-    X.append(data[index]['features'])
+# for index, row in enumerate(data):
+    # X.append(data[index]['features'])
 
-Y = []
-Y = labels['same']
+# Y = []
+# Y = labels['same']
 
 #%%
 from sklearn.linear_model import Perceptron
@@ -225,4 +231,3 @@ pcp = Perceptron()
 # trainY = 
 # testX = 
 # testY = 
-    
