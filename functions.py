@@ -12,7 +12,7 @@ def read_data():
     return rawData
 
 def read_truth_data():
-    with open('data/dataShuffled.pkl', 'rb') as f:
+    with open('data/labelsShuffled.pkl', 'rb') as f:
         rawTruths = pickle.load(f)
     return rawTruths
 
@@ -30,13 +30,13 @@ def truthimport(rawTruths, pandas_check = True):
 
 def textimport_light(rawData, pandas_check = True):
     if (pandas_check):
-        return pd.DataFrame.from_dict(rawData)
+        return pd.DataFrame.from_dict(rawData)[:2289]
     else:
         return list(rawData)[:2289]
 
 def truthimport_light(rawTruths, pandas_check = True):
     if (pandas_check):
-        return pd.DataFrame.from_dict(rawTruths)
+        return pd.DataFrame.from_dict(rawTruths)[:2289]
     else:
         return list(rawTruths)[:2289]
 

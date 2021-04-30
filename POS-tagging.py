@@ -1,7 +1,7 @@
 ### POS-tagging.py #0s
 import pandas as pd
 import numpy as np
-from functions import textimport_light, truthimport_light
+from functions import textimport_light, truthimport_light, read_data, read_truth_data
 from collections import Counter, OrderedDict, ChainMap
 import spacy
 import string
@@ -11,11 +11,16 @@ import operator, functools
 from nltk.util import skipgrams
 from nltk.corpus import stopwords
 
+#%% Read the data
+
+rawData = read_data()
+rawTruths = read_truth_data()
+
 #%% Creating our corpus of texts. Labels and IDs are not included. #11s
 print("first part")
 
-df = textimport_light()
-df_truth = truthimport_light()
+df = textimport_light(rawData)
+df_truth = truthimport_light(rawTruths)
 
 
 #%% For splitting the textpairs into an array of 1xN. #0.3s
