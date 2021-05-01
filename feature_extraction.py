@@ -126,6 +126,8 @@ def index_of_coincidence(text):
     ioc = frequencySum / (N*(N-1)) #* (normalizing_coef/(N*(N-1)))
     return ioc
 
+#%%
+
 def combined(text, words, sentences):
     # print(text)
     int_or_float = np.array([avg_word_length(words),
@@ -177,36 +179,27 @@ def create_input_matrix(data_frame):
     
     vectors = []
     for i in range(len(data_frame)):
-        vector = vectorize(data_frame.loc[i][2][0], df.loc[i][2][1])
+        vector = vectorize(data_frame.loc[i][2][0], data_frame.loc[i][2][1])
         vectors.append(vector)
     
     matrix = np.stack(vectors, axis = 1)
 
-    return matrix
+    return matrix.T
         
-# df = textimport_light(rawData, True)[0:10]
-# matrix = create_input_matrix(df)
-
-#def exact_word_matches(words, words2):
- #   unique1 = set(words)
-  #  unique2 = set(words2)
-   # matches = len(unique1.intersection(unique2))
-    #return matches
+#data = textimport_light(rawData, True)
+#matrix = create_input_matrix(data[0:100])
 
 def getFeatures(text):
     return features
 
-data = textimport_light(rawData, False)
-labels = truthimport_light(rawTruths)
-
-for index, row in enumerate(data[:10]):
-    text1 = data[index]['pair'][0]
-    text2 = data[index]['pair'][1]
+#for index, row in enumerate(data[:10]):
+ #   text1 = data[index]['pair'][0]
+  #  text2 = data[index]['pair'][1]
     
-    words1, sentences1 = tokenizer(text1)
-    words2, sentences2 = tokenizer(text2)
+   # words1, sentences1 = tokenizer(text1)
+    #words2, sentences2 = tokenizer(text2)
     
-    data[index]['features'] = [np.hstack((combined(text1, words1, sentences1))), np.hstack((combined(text2, words2, sentences2)))]
+    #data[index]['features'] = [np.hstack((combined(text1, words1, sentences1))), np.hstack((combined(text2, words2, sentences2)))]
 
 # with open ('data2289-withFeatures.pkl', 'wb') as f:
 #     pickle.dump(data,f)
@@ -223,11 +216,3 @@ X = []
 # Y = labels['same']
 
 #%%
-from sklearn.linear_model import Perceptron
-
-pcp = Perceptron()
-
-# trainX = df 
-# trainY = 
-# testX = 
-# testY = 
