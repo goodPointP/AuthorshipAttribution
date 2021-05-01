@@ -5,6 +5,9 @@ import readability # pip install readability # #https://github.com/mmautner/read
 import pandas as pd
 import numpy as np
 from scipy import spatial
+import liwc
+import re
+from collections import Counter
 
 #%%
 # RUN ONLY ONCE
@@ -126,6 +129,18 @@ def index_of_coincidence(text):
     ioc = frequencySum / (N*(N-1)) #* (normalizing_coef/(N*(N-1)))
     return ioc
 
+def LIWC(text):
+
+    def liwc_tokenize(text):
+        for match in re.finditer(r'\w+', text, re.UNICODE):
+            yield match.group(0)
+
+    parse, category_names = liwc.load_token_parser('data/LIWC2007_English100131.dic')
+    token_text = liwc_tokenize(text)
+    liwc_vec = list(dict(Counter(category for token in token_text for category in parse(token))).values())
+    
+    return liwc_vec
+
 #%%
 
 def combined(text, words, sentences):
@@ -139,7 +154,7 @@ def combined(text, words, sentences):
     
     list_or_array = np.array([function_words(words), intensifier_words(words), 
                     time_adverbs(words), readability_metrics(sentences)[1],
-                    readability_metrics(sentences)[2]], dtype="object")
+                    readability_metrics(sentences)[2], LIWC(text)], dtype="object")
     
     return [int_or_float, list_or_array]
 
@@ -170,6 +185,7 @@ def vectorize(text1, text2):
 
     for i in range(len(vecs1)):
         feat_vec_part_two[i] = cosine_sim(vecs1[i], vecs2[i])
+
         
     feat_vec = np.hstack([feat_vec_part_one, feat_vec_part_two])
     
@@ -186,8 +202,8 @@ def create_input_matrix(data_frame):
 
     return matrix.T
         
-#data = textimport_light(rawData, True)
-#matrix = create_input_matrix(data[0:100])
+data = textimport_light(rawData, True)
+matrix = create_input_matrix(data[0:100])
 
 def getFeatures(text):
     return features
@@ -197,9 +213,9 @@ def getFeatures(text):
   #  text2 = data[index]['pair'][1]
     
    # words1, sentences1 = tokenizer(text1)
-    #words2, sentences2 = tokenizer(text2)
+   # words2, sentences2 = tokenizer(text2)
     
-    #data[index]['features'] = [np.hstack((combined(text1, words1, sentences1))), np.hstack((combined(text2, words2, sentences2)))]
+   # data[index]['features'] = [np.hstack((combined(text1, words1, sentences1))), np.hstack((combined(text2, words2, sentences2)))]
 
 # with open ('data2289-withFeatures.pkl', 'wb') as f:
 #     pickle.dump(data,f)
