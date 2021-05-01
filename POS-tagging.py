@@ -30,7 +30,54 @@ text_list = pd.Series(df['pair'].explode())
 text_IDs, text_uniques = text_list.factorize()
 df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 
+#%%
+nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
 
+def pos_tag(text_list, no=100):
+    
+    # text_list = pd.Seties(df['pair'].explode()) or equal
+    # no = number of texts used
+    
+    nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
+    no = int(no)
+    
+    #preprocessing
+    text_IDs, text_uniques = text_list.factorize()
+    key = str.maketrans('', '', string.punctuation.replace("'", "").replace('"', ''))
+    texts = ['"{}"'.format(str(re.sub("(?<!s)'\B|\B'\s*", "", text.replace('"', "'")).translate(key))) for text in text_uniques[:no]]
+
+    #pos-tagging
+    tags = []
+    for doc in nlp.pipe(texts, batch_size=50):
+        tags.append([token.tag_ for token in doc])
+    
+    #skipgram-creation
+    skips = [dict(Counter(skipgrams(tagset, 2, 2)).most_common(200)) for tagset in tags]
+    base = dict.fromkeys(dict(ChainMap(*skips)), 0)
+
+    #ordering
+    vecs = []
+    for subset in skips:
+        sub_dict = base.copy()
+        for key, value in subset.items():
+            sub_dict[key] = value
+        vecs.append(list(sub_dict.values()))
+    
+    #TF
+    doc_lengths = np.array([len(tagset) for tagset in tags]).reshape(-1,1)
+    vec_array = np.array(vecs)
+    term_freq = np.divide(vec_array, doc_lengths)
+
+    #IDF
+    vecs_transposed = np.array(vecs).T
+    occurences = np.nonzero(vecs_transposed)[0]
+    occurence_counts = np.unique(occurences, return_counts=True)[1]
+    doc_freq = np.log(no/occurence_counts)
+
+    #TF-IDF
+    tf_idf = term_freq*doc_freq
+    
+    return tf_idf
 #%% defining the subset used (no. of texts) 0.06s
 print("3rd part")
 
@@ -108,15 +155,3 @@ y_test = y[35:]
 svm_clf = svm.SVC(kernel='rbf', C=3, gamma=100)
 svm_clf.fit(X_train, y_train)
 score = svm_clf.score(X_test, y_test)
-
-#%%%
-from sklearn import svm
-from sklearn.model_selection import GridSearchCV
-parameters = {'kernel':['rbf'], 'C':[1,3,5,10], 'gamma':[0.001, 0.1, 1, 10, 100]}
-svc = svm.SVC()
-clf = GridSearchCV(svc, parameters)
-clf.fit(X,y)
-
-
-g = sorted(clf.cv_results_.keys())
-g2 = sorted(clf.cv_results_)
