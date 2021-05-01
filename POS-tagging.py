@@ -2,14 +2,14 @@
 import pandas as pd
 import numpy as np
 from functions import textimport_light, truthimport_light, read_data, read_truth_data
-from collections import Counter, OrderedDict, ChainMap
+from collections import Counter,  ChainMap
 import spacy
 import string
 import re
 from sklearn import svm
-import operator, functools
 from nltk.util import skipgrams
-from nltk.corpus import stopwords
+import functools
+import operator
 
 #%% Read the data
 
@@ -35,7 +35,7 @@ df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 print("3rd part")
 
 key = str.maketrans('', '', string.punctuation.replace("'", "").replace('"', ''))
-no = int(50)
+no = int(100)
 texts = ['"{}"'.format(str(re.sub("(?<!s)'\B|\B'\s*", "", text.replace('"', "'")).translate(key))) for text in text_uniques[:no]]
 
 # 1. change quotes to apostrophes to make sure contractions like "aren't" are detected as such (JSON changes apostrohes to quotes when loading) == text.replace('"', "'"))
@@ -43,10 +43,6 @@ texts = ['"{}"'.format(str(re.sub("(?<!s)'\B|\B'\s*", "", text.replace('"', "'")
 # 3. remove punctuation (key = punctuation except apostrophe and quote) == .translate(key))
 # 4. wrap each string in start/end quotes. == '"{}"'.format
 
-#%% Removing stopwords
-
-# stopwordkey = str.maketrans('','', str(stopwords.words('english')))
-# test2 = str(test.split()).translate(stopwordkey)
 
 #%% initializing spacy and excluding redundancy. #extracting POS-tags from texts. 11.6s
 print("4th part")
@@ -72,19 +68,55 @@ for subset in skips:
     for key, value in subset.items():
         sub_dict[key] = value
     vecs.append(list(sub_dict.values()))
+
+#%% TF-IDF
+
+#TF
+doc_lengths = np.array([len(tagset) for tagset in tags]).reshape(-1,1)
+vec_array = np.array(vecs)
+term_freq = np.divide(vec_array, doc_lengths)
+
+#IDF
+vecs_transposed = np.array(vecs).T
+occurences = np.nonzero(vecs_transposed)[0]
+occurence_counts = np.unique(occurences, return_counts=True)[1]
+doc_freq = np.log(no/occurence_counts)
+
+#TF-IDF
+tf_idf = term_freq*doc_freq
+
 #%%
 print("7th part")
 
-tagged_pairs = np.array(vecs, dtype="object")[np.array(list(df['text_id'][:int(no/2)]))]
-x, y, z = tagged_pairs.shape
-tagged_pairs = tagged_pairs.reshape(x, y*z)
+tagged_pairs = tf_idf[np.array(list(df['text_id'][:int(no/2)]))]
+x_d, y_d, z_d = tagged_pairs.shape
+tagged_pairs = tagged_pairs.reshape(x_d, y_d*z_d)
 
 
 #%% SVM
 print("8th part")
 
 X = tagged_pairs
+X_train = X[:35]
+X_test = X[35:]
+
 y = np.array(df_truth['same'][:int(no/2)]).astype(int)
-svm_clf = svm.SVC()
-svm_clf.fit(X, y)
-svm_clf.predict(X[0].reshape(1,-1))
+y_train = y[:35]
+y_test = y[35:]
+#%%
+
+svm_clf = svm.SVC(kernel='rbf', C=3, gamma=100)
+svm_clf.fit(X_train, y_train)
+score = svm_clf.score(X_test, y_test)
+
+#%%%
+from sklearn import svm
+from sklearn.model_selection import GridSearchCV
+parameters = {'kernel':['rbf'], 'C':[1,3,5,10], 'gamma':[0.001, 0.1, 1, 10, 100]}
+svc = svm.SVC()
+clf = GridSearchCV(svc, parameters)
+clf.fit(X,y)
+
+
+g = sorted(clf.cv_results_.keys())
+g2 = sorted(clf.cv_results_)
