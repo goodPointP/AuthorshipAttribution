@@ -59,8 +59,8 @@ def tokenizer(text):
 
 def normalize(data):
     normalized = StandardScaler()
-    normalized.fit(data)
-    return normalized
+    norm_data = normalized.fit_transform(data)
+    return norm_data
 
 def split_data(data, truth):
     X_train, X_test, y_train, y_test = train_test_split(
