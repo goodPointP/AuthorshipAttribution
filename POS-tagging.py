@@ -33,9 +33,9 @@ df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 #%%
 nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
 
-def pos_tag(text_list, no=100):
+def pos_tag(text_list=pd.Series(df['pair'].explode()), no=100):
     
-    # text_list = pd.Seties(df['pair'].explode()) or equal
+    # text_list = pd.Series(df['pair'].explode()) or equal
     # no = number of texts used
     
     nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
@@ -77,7 +77,11 @@ def pos_tag(text_list, no=100):
     #TF-IDF
     tf_idf = term_freq*doc_freq
     
-    return tf_idf
+    #cosine similarity
+    tagged_pairs = tf_idf[np.array(list(df['text_id'][:int(no/2)]))]
+    cos = [spatial.distance.pdist(pair, metric='cosine') for pair in tagged_pairs]
+    
+    return cos
 #%% defining the subset used (no. of texts) 0.06s
 print("3rd part")
 
@@ -136,22 +140,23 @@ tf_idf = term_freq*doc_freq
 print("7th part")
 
 tagged_pairs = tf_idf[np.array(list(df['text_id'][:int(no/2)]))]
-x_d, y_d, z_d = tagged_pairs.shape
-tagged_pairs = tagged_pairs.reshape(x_d, y_d*z_d)
+cos = [spatial.distance.pdist(pair, metric='cosine') for pair in tagged_pairs]
+#x_d, y_d, z_d = tagged_pairs.shape
+#tagged_pairs = tagged_pairs.reshape(x_d, y_d*z_d)
 
 
 #%% SVM
 print("8th part")
 
-X = tagged_pairs
-X_train = X[:35]
-X_test = X[35:]
+# X = tagged_pairs
+# X_train = X[:35]
+# X_test = X[35:]
 
-y = np.array(df_truth['same'][:int(no/2)]).astype(int)
-y_train = y[:35]
-y_test = y[35:]
-#%%
+# y = np.array(df_truth['same'][:int(no/2)]).astype(int)
+# y_train = y[:35]
+# y_test = y[35:]
+# #%%
 
-svm_clf = svm.SVC(kernel='rbf', C=3, gamma=100)
-svm_clf.fit(X_train, y_train)
-score = svm_clf.score(X_test, y_test)
+# svm_clf = svm.SVC(kernel='rbf', C=3, gamma=100)
+# svm_clf.fit(X_train, y_train)
+# score = svm_clf.score(X_test, y_test)
