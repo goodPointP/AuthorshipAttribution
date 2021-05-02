@@ -134,10 +134,14 @@ def LIWC(text):
     def liwc_tokenize(text):
         for match in re.finditer(r'\w+', text, re.UNICODE):
             yield match.group(0)
-
+            
     parse, category_names = liwc.load_token_parser('data/LIWC2007_English100131.dic')
     token_text = liwc_tokenize(text)
-    liwc_vec = list(dict(Counter(category for token in token_text for category in parse(token))).values())
+    
+    counterVar = Counter()
+    counterVar.update({x:0 for x in category_names})
+    counterVar.update(category for token in token_text for category in parse(token))
+    liwc_vec = list(dict(counterVar).values())
     
     return liwc_vec
 
