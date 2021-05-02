@@ -6,10 +6,7 @@ from collections import Counter,  ChainMap
 import spacy
 import string
 import re
-from sklearn import svm
 from nltk.util import skipgrams
-import functools
-import operator
 from scipy import spatial
 
 #%%
@@ -29,7 +26,7 @@ df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 
 nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
 
-def pos_tag(text_list=pd.Series(df['pair'].explode()), no=100):
+def pos_tag(text_list=pd.Series(df['pair'].explode()), no=100, counts=False):
     
     # text_list = pd.Series(df['pair'].explode()) or equal
     # no = number of texts used
@@ -46,6 +43,7 @@ def pos_tag(text_list=pd.Series(df['pair'].explode()), no=100):
     tags = []
     for doc in nlp.pipe(texts, batch_size=50):
         tags.append([token.tag_ for token in doc])
+    
     
     #skipgram-creation
     skips = [dict(Counter(skipgrams(tagset, 2, 2)).most_common(200)) for tagset in tags]
@@ -77,7 +75,11 @@ def pos_tag(text_list=pd.Series(df['pair'].explode()), no=100):
     tagged_pairs = tf_idf[np.array(list(df['text_id'][:int(no/2)]))]
     cos = [spatial.distance.pdist(pair, metric='cosine') for pair in tagged_pairs]
     
-    return cos
+    if counts==True:
+        pos_counts = [dict(Counter(text)) for text in tags]
+        return cos, pos_counts
+    else:
+        return cos
 #%%
 
-test_cos = pos_tag()
+cosine_similarities = pos_tag()
