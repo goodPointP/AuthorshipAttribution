@@ -41,7 +41,7 @@ def pos_tag(text_list=pd.Series(df['pair'].explode()), no=100, counts=False):
 
     #pos-tagging
     tags = []
-    for doc in nlp.pipe(texts, batch_size=50):
+    for doc in nlp.pipe(texts, batch_size=500):
         tags.append([token.tag_ for token in doc])
     
     
