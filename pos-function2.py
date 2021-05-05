@@ -85,23 +85,30 @@ nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
 texts = pd.Series(df['pair'].explode())[:10]
 
 #%%
-%%time
+
 text_list = pd.Series(df['pair'].explode())
-lists = [[]for i in range(5)]
+numProc = 8
+step = len(text_list)/numProc
+
+results = [[] for i in range(numProc)]
+
 # t1 = Thread(target = pos_tag)
 # t2 = Thread(target = pos_tag, args=(50))
 if __name__ == '__main__':
-    with Pool(processes=4) as pool:         # start 4 worker processes
-            result = pool.apply_async(pos_tag, args(text_list[start:end]))
-            result2 = pool.apply_async(pos_tag)
-            pool.close()
-            pool.join()
+    # startTime = timer()
+    with Pool(processes=numProc) as pool:         # start 4 worker processes
+        for i in range(numProc):
+            start = step * i
+            end = start + step
+
+            results[i] = pool.apply_async(pos_tag, args=(text_list[int(start):int(end)],))
+            
+        pool.close()
+        pool.join()
+    # endTime = timer()
+    
+    # print (f"It took {endTime-startTime}s to run.")
 
 #%%
-%%time
-tags = pos_tag(text_list[:10])
 
-#%%
-%%time
-
-cos = skipgramming(tags)
+# cosine_similarities = pos_tag()
