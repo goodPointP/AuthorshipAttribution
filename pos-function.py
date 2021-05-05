@@ -82,4 +82,4 @@ def pos_tag(text_list=pd.Series(df['pair'].explode()), no=100, counts=False):
         return cos
 #%%
 
-cosine_similarities = pos_tag()
+cosine_similarities = pos_tag(counts=True)
