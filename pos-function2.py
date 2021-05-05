@@ -9,6 +9,7 @@ import re
 from nltk.util import skipgrams
 from scipy import spatial
 from multiprocessing import Pool
+import itertools
 #%%
 
 rawData = read_data()
@@ -39,7 +40,7 @@ def pos_tag(text_list=pd.Series(df['pair'].explode())[:100]):
 
     #pos-tagging
     tags = []
-    for doc in nlp.pipe(texts, batch_size=50):
+    for doc in nlp.pipe(texts, batch_size=5):
         tags.append([token.tag_ for token in doc])
     return tags
     
@@ -112,3 +113,10 @@ if __name__ == '__main__':
 #%%
 
 # cosine_similarities = pos_tag()
+allResults = []
+for result in results:
+    allResults.append(result.get())
+
+allResults = list(itertools.chain(*allResults))
+
+finalRes = skipgramming(allResults)
