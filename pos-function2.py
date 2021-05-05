@@ -8,7 +8,8 @@ import string
 import re
 from nltk.util import skipgrams
 from scipy import spatial
-
+from multiprocessing import Pool
+import itertools
 #%%
 
 rawData = read_data()
@@ -26,26 +27,26 @@ df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 
 nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
 
-def pos_tag(text_list=pd.Series(df['pair'].explode()), no=100, counts=False):
+def pos_tag(text_list=pd.Series(df['pair'].explode())[:100]):
     
     # text_list = pd.Series(df['pair'].explode()) or equal
-    # no = number of texts used
-    
+
     nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
-    no = int(no)
     
     #preprocessing
     text_IDs, text_uniques = text_list.factorize()
     key = str.maketrans('', '', string.punctuation.replace("'", "").replace('"', ''))
-    texts = ['"{}"'.format(str(re.sub("(?<!s)'\B|\B'\s*", "", text.replace('"', "'")).translate(key))) for text in text_uniques[:no]]
+    texts = ['"{}"'.format(str(re.sub("(?<!s)'\B|\B'\s*", "", text.replace('"', "'")).translate(key))) for text in text_uniques]
 
     #pos-tagging
     tags = []
-    for doc in nlp.pipe(texts, batch_size=500):
+    for doc in nlp.pipe(texts, batch_size=5):
         tags.append([token.tag_ for token in doc])
+    return tags
     
-    
+def skipgramming(tags, return_counts=False):
     #skipgram-creation
+    no = int(len(tags))
     skips = [dict(Counter(skipgrams(tagset, 2, 2)).most_common(200)) for tagset in tags]
     base = dict.fromkeys(dict(ChainMap(*skips)), 0)
 
@@ -75,11 +76,47 @@ def pos_tag(text_list=pd.Series(df['pair'].explode()), no=100, counts=False):
     tagged_pairs = tf_idf[np.array(list(df['text_id'][:int(no/2)]))]
     cos = [spatial.distance.pdist(pair, metric='cosine') for pair in tagged_pairs]
     
-    if counts==True:
+    if return_counts==True:
         pos_counts = [dict(Counter(text)) for text in tags]
         return cos, pos_counts
     else:
         return cos
 #%%
+nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
+texts = pd.Series(df['pair'].explode())[:10]
 
-cosine_similarities = pos_tag(counts=True)
+#%%
+
+text_list = pd.Series(df['pair'].explode())
+numProc = 8
+step = len(text_list)/numProc
+
+results = [[] for i in range(numProc)]
+
+# t1 = Thread(target = pos_tag)
+# t2 = Thread(target = pos_tag, args=(50))
+if __name__ == '__main__':
+    # startTime = timer()
+    with Pool(processes=numProc) as pool:         # start 4 worker processes
+        for i in range(numProc):
+            start = step * i
+            end = start + step
+
+            results[i] = pool.apply_async(pos_tag, args=(text_list[int(start):int(end)],))
+            
+        pool.close()
+        pool.join()
+    # endTime = timer()
+    
+    # print (f"It took {endTime-startTime}s to run.")
+
+#%%
+
+# cosine_similarities = pos_tag()
+allResults = []
+for result in results:
+    allResults.append(result.get())
+
+allResults = list(itertools.chain(*allResults))
+
+finalRes = skipgramming(allResults)
