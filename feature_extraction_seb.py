@@ -104,16 +104,14 @@ def readability_metrics(corpus):
         red_score = readability_results['readability grades']['Kincaid']
         scores.append(red_score)
         
-        beginnings = [readability_results['sentence beginnings'][i] for i in begin_types]
-        sentence_beginnings.append(beginnings)
-        
         types = [readability_results['word usage'][i] for i in w_classes]
-        word_types.append(types)
+        types_ratio = [r / len(text) for r in types]
+        word_types.append(types_ratio)
         
         syllables = [readability_results['sentence info']['syll_per_word']]
         avg_syllables.append(syllables)
         
-    return scores, sentence_beginnings, word_types, avg_syllables
+    return scores, word_types, avg_syllables
 
 def function_words(corpus):
     f_string = []
@@ -145,7 +143,8 @@ def LIWC(corpus):
         counterVar.update({x:0 for x in category_names})
         counterVar.update(category for token in token_text for category in parse(token))
         liwc_vec = list(dict(counterVar).values())
-        liwc_vecs.append(liwc_vec)
+        liwc_ratio = [l / len(text) for l in liwc_vec]
+        liwc_vecs.append(liwc_ratio)
         
     return liwc_vecs
 
@@ -180,7 +179,7 @@ def time_adverbs(corpus):
 def digits(corpus):
     digits = []
     for text in corpus:
-        digits.append(sum(c.isnumeric() for c in text))
+        digits.append(sum(c.isnumeric() for c in text) / len(text))
     return digits
 
 def index_of_coincidence(text):
@@ -203,7 +202,6 @@ def index_of_coincidence(text):
     # ioc = sum(chances)/((len(text) * (len(text)-1)))
     ioc = frequencySum / (N*(N-1)) #* (normalizing_coef/(N*(N-1)))
     return ioc
-
 
 #%%
 
