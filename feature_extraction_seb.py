@@ -14,6 +14,7 @@ from collections import Counter
 # read the data
 rawData = read_data()
 rawTruths = read_truth_data()
+data = textimport_light(rawData)
 
 #%%
 
@@ -41,7 +42,7 @@ def special_characters(corpus):
     spec = '#$%&\()*+-/<=>@[\\]^_{|}~'
     spec_count = []
     for text in corpus:
-        spec_count.append(sum(c in spec for c in text.replace(" ", "")))
+        spec_count.append(sum(c in spec for c in text.replace(" ", ""))/len(text))
     return spec_count
 
 #punc: no
@@ -53,17 +54,21 @@ def avg_word_length(corpus):
         lengths.append(len(text.replace(" ", "")) / len(f.split()))
     return lengths
 
-#do we want this to return a sum of function words insted?
+# index 0 returns frequency count / text lenght and index 1 returns sum / text lenght
 def function_words(corpus):
     f_string = []
+    f_word_sum = []
     f_word_freq = []
     with open('data/function_words.txt') as f:
         for l in f:
             f_string.append(l.strip())
     f_words = f_string[0].split()
     for text in corpus:
-        f_word_freq.append([text.count(f_word) for f_word in f_words])
-    return f_word_freq
+        freq = [text.count(f_word) for f_word in f_words]
+        freq_ratio = [i / len(text) for i in freq]
+        f_word_freq.append(freq_ratio)
+        f_word_sum.append(sum(freq) / len(text))
+    return f_word_freq, f_word_sum
 
 def TTR(corpus):
     ttr = []
@@ -71,73 +76,112 @@ def TTR(corpus):
         ttr.append((len(set(text.split())) / (len(text.split())))*100)
     return ttr
 
-#should this be divided by text length? seems uneven for longer/shorter texts
 def hapax_legomena(corpus):
     haps = []
     for text in corpus:
-        haps.append(len(FreqDist(text.split()).hapaxes()))
+        haps.append(len(FreqDist(text.split()).hapaxes()) / len(text))
     return haps
+
+### Fixed but horribly slow and I don't know how to make more efficient
+### Index to get different measures
+def readability_metrics(corpus):
+    
+    scores = []
+    sentence_beginnings = []
+    word_types = []
+    avg_syllables = []
+    
+    for text in corpus:
+       # line_sep = '.\n'.join(sentences)
+        readability_results = readability.getmeasures(text, lang='en')
+        
+        begin_types = ['article','conjunction','interrogative'
+                       ,'preposition','pronoun','subordination']
+        
+        w_classes = ['auxverb', 'conjunction','nominalization',
+                     'preposition','pronoun', 'tobeverb' ]
+        
+        red_score = readability_results['readability grades']['Kincaid']
+        scores.append(red_score)
+        
+        beginnings = [readability_results['sentence beginnings'][i] for i in begin_types]
+        sentence_beginnings.append(beginnings)
+        
+        types = [readability_results['word usage'][i] for i in w_classes]
+        word_types.append(types)
+        
+        syllables = [readability_results['sentence info']['syll_per_word']]
+        avg_syllables.append(syllables)
+        
+    return scores, sentence_beginnings, word_types, avg_syllables
+
+def function_words(corpus):
+    f_string = []
+    f_word_sum = []
+    f_word_freq = []
+    with open('data/function_words.txt') as f:
+        for l in f:
+            f_string.append(l.strip())
+    f_words = f_string[0].split()
+    for text in corpus:
+        freq = [text.count(f_word) for f_word in f_words]
+        freq_ratio = [i / len(text) for i in freq]
+        f_word_freq.append(freq_ratio)
+        f_word_sum.append(sum(freq) / len(text))
+    return f_word_freq, f_word_sum
+
+def LIWC(corpus):
+
+    def liwc_tokenize(text):
+        for match in re.finditer(r'\w+', text, re.UNICODE):
+            yield match.group(0)
+    
+    liwc_vecs = []
+    parse, category_names = liwc.load_token_parser('data/LIWC2007_English100131.dic')
+    
+    for text in corpus:
+        token_text = liwc_tokenize(text)
+        counterVar = Counter()
+        counterVar.update({x:0 for x in category_names})
+        counterVar.update(category for token in token_text for category in parse(token))
+        liwc_vec = list(dict(counterVar).values())
+        liwc_vecs.append(liwc_vec)
+        
+    return liwc_vecs
 
 #punc: no
 #stop: no
 
 def intensifier_words(corpus):
     i_words = []
-    i_word_freq = []
+    i_word_freqs = []
     with open('data/intensifier_words.txt') as i:
         for l in i:
            i_words.append(l.strip())
     for text in corpus:
-        i_word_freq.append([text.count(i_word) for i_word in i_words])
-    return i_word_freq
-        
+        i_word_freq = [text.count(i_word) for i_word in i_words]
+        i_word_ratio = [f / len(text) for f in i_word_freq]
+        i_word_freqs.append(i_word_ratio)
+    return i_word_freqs
+
 def time_adverbs(corpus):
     t_words = []
-    t_word_freq = []
+    t_word_freqs = []
     with open('data/time_adverbs.txt') as t:
         for l in t:
            t_words.append(l.strip())
     for text in corpus:
-        t_word_freq.append([text.count(t_word) for t_word in t_words])
-    return t_word_freq
+        t_word_freq = [text.count(t_word) for t_word in t_words]
+        t_word_ratio = [t / len(text) for t in t_word_freq]
+        t_word_freqs.append(t_word_ratio)
+        
+    return t_word_freqs
 
 def digits(corpus):
     digits = []
     for text in corpus:
         digits.append(sum(c.isnumeric() for c in text))
     return digits
-
-
-
-### YET TO BE FIXED 
-def readability_metrics(sentences):
-    line_sep = '.\n'.join(sentences)
-    readability_results = readability.getmeasures(line_sep, lang='en')
-    red_score = readability_results['readability grades']['Kincaid']
-    begin_types = ['article','conjunction','interrogative'
-                   ,'preposition','pronoun','subordination']
-    
-    beginnings = [readability_results['sentence beginnings'][i] for i in begin_types]
-
-    w_classes = ['auxverb', 'conjunction','nominalization',
-                  'preposition','pronoun', 'tobeverb' ]
-    
-    word_types = [readability_results['word usage'][i] for i in w_classes]
-    avg_syllables = [readability_results['sentence info']['syll_per_word']]
-    
-    return red_score, beginnings, word_types, avg_syllables
-
-
-def superlatives(words):
-    suffix = 'est'
-    sup = 0
-    for word in words:
-        if word.endswith(suffix):
-            sup += 1
-        elif word == 'most':
-            sup += 1
-    return sup
-
 
 def index_of_coincidence(text):
     # TODO: REMOVE PUNCTUATION
@@ -147,7 +191,6 @@ def index_of_coincidence(text):
     text = text.upper()
     
     N = len(text)
-    
     
     # chances = []
     frequencySum = 0.0
@@ -161,26 +204,11 @@ def index_of_coincidence(text):
     ioc = frequencySum / (N*(N-1)) #* (normalizing_coef/(N*(N-1)))
     return ioc
 
-def LIWC(text):
-
-    def liwc_tokenize(text):
-        for match in re.finditer(r'\w+', text, re.UNICODE):
-            yield match.group(0)
-            
-    parse, category_names = liwc.load_token_parser('data/LIWC2007_English100131.dic')
-    token_text = liwc_tokenize(text)
-    
-    counterVar = Counter()
-    counterVar.update({x:0 for x in category_names})
-    counterVar.update(category for token in token_text for category in parse(token))
-    liwc_vec = list(dict(counterVar).values())
-    
-    return liwc_vec
 
 #%%
 
 def combined(text, words, sentences):
-    # print(text)
+
     int_or_float = np.array([avg_word_length(words),
                      avg_sentence_length(words, sentences), punctuation_ratio(text, words), 
                      TTR(words), hapax_legomena(words), readability_metrics(sentences)[0],
