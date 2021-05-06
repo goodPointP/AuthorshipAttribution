@@ -51,17 +51,29 @@ def remove_duplicates(dataframe):
 def remove_punctuation(text):
     return text.translate(str.maketrans('', '', string.punctuation))
 
-def remove_punc_v2(text):
+def remove_punc(corpus):
+    texts = []
     key = str.maketrans('', '', string.punctuation.replace("'", "").replace('"', ''))
-    text = str(re.sub("(?<!s)'\B|\B'\s*", "", text.replace('"', "'")).translate(key))
-    return text
+    for text in corpus:
+        texts.append(str(re.sub("(?<!s)'\B|\B'\s*", "", text.replace('"', "'")).translate(key)))
+    return texts
 
-def preprocess(corpus):
+def remove_stop(corpus):
+    texts = []
     stop_words = stopwords.words('english')
+    stopwords_dict = set(stop_words)
+    for text in corpus:
+        texts.append(' '.join([word for word in text.split() if word.lower() not in stopwords_dict]))
+    return texts
+
+def remove_punc_stop(corpus):
+    stop_words = stopwords.words('english')
+    key = str.maketrans('', '', string.punctuation.replace("'", "").replace('"', ''))
     stopwords_dict = set(stop_words)
     texts = []
     for text in corpus:
-        texts.append(' '.join([word for word in remove_punc_v2(text).split() if word.lower() not in stopwords_dict]))    
+        text = str(re.sub("(?<!s)'\B|\B'\s*", "", text.replace('"', "'")).translate(key))
+        texts.append(' '.join([word for word in text.split() if word.lower() not in stopwords_dict]))    
     return texts
 
 def remove_spaces(text):
