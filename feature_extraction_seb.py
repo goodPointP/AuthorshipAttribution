@@ -24,7 +24,7 @@ data = textimport_light(rawData)
 def avg_sentence_length(corpus):
     s_lengths = []
     for text in corpus:
-        sents = [remove_punc_v2(sent) for sent in text.split(". ")]
+        sents = [remove_punctuation(sent) for sent in text.split(". ")]
         s_lengths.append(len(''.join(sents).split())/len(sents))
     return s_lengths
 

@@ -1,6 +1,7 @@
 from functions import *
 from feature_extraction_seb import *
 from readability import Readability
+import textstat #pip install textstat
 import pandas as pd
 #%%
 
@@ -63,7 +64,9 @@ def readability_metrics2(corpus):
     helper = []
     for text in corpus:
        # line_sep = '.\n'.join(sentences)
-        readability_results = Readability(text)
+        # readability_results = Readability(text)
+        # scores.append(Readability(text).flesch_kincaid())
+        scores.append(textstat.flesch_kincaid_grade(text))
         # begin_types = ['article','conjunction','interrogative'
         #                ,'preposition','pronoun','subordination']
         
@@ -80,17 +83,18 @@ def readability_metrics2(corpus):
         # syllables = [readability_results['sentence info']['syll_per_word']]
         # avg_syllables.append(syllables)
         
-    return helper #scores, avg_syllables #word_types
+    return  scores#, avg_syllables #word_types
 
 #%%
 
 text = corpora[1][0]
-readability_results = readability.getmeasures(text, lang='en') #21ms
+# readability_results = readability.getmeasures(text, lang='en') #21ms
 w_classes = ['auxverb', 'conjunction','nominalization',
                      'preposition','pronoun', 'tobeverb' ]
    
 begin_types = ['article','conjunction','interrogative'
                ,'preposition','pronoun','subordination']
+
 #%%
 %%time
 f = readability_metrics2(corpora[1])
