@@ -25,7 +25,7 @@ def avg_sentence_length(corpus):
     s_lengths = []
     for text in corpus:
         sents = [remove_punc_v2(sent) for sent in text.split(". ")]
-        s_lengths.append(len(''.join(test).split())/len(sents))
+        s_lengths.append(len(''.join(sents).split())/len(sents))
     return s_lengths
 
 #punc: yes
@@ -51,7 +51,7 @@ def special_characters(corpus):
 def avg_word_length(corpus):
     lengths = []
     for text in corpus:
-        lengths.append(len(text.replace(" ", "")) / len(f.split()))
+        lengths.append(len(text.replace(" ", "")) / len(text.split()))
     return lengths
 
 # index 0 returns frequency count / text lenght and index 1 returns sum / text lenght
@@ -113,20 +113,7 @@ def readability_metrics(corpus):
         
     return scores, word_types, avg_syllables
 
-def function_words(corpus):
-    f_string = []
-    f_word_sum = []
-    f_word_freq = []
-    with open('data/function_words.txt') as f:
-        for l in f:
-            f_string.append(l.strip())
-    f_words = f_string[0].split()
-    for text in corpus:
-        freq = [text.count(f_word) for f_word in f_words]
-        freq_ratio = [i / len(text) for i in freq]
-        f_word_freq.append(freq_ratio)
-        f_word_sum.append(sum(freq) / len(text))
-    return f_word_freq, f_word_sum
+
 
 def LIWC(corpus):
 
