@@ -203,94 +203,84 @@ def index_of_coincidence(text):
     ioc = frequencySum / (N*(N-1)) #* (normalizing_coef/(N*(N-1)))
     return ioc
 
-#%%
+# #%%
 
-def combined(text, words, sentences):
+# def combined(text, words, sentences):
 
-    int_or_float = np.array([avg_word_length(words),
-                     avg_sentence_length(words, sentences), punctuation_ratio(text, words), 
-                     TTR(words), hapax_legomena(words), readability_metrics(sentences)[0],
-                     readability_metrics(sentences)[3],
-                     digits(words), superlatives(words),
-                     special_characters(words), index_of_coincidence(text)], dtype="object")
+#     int_or_float = np.array([avg_word_length(words),
+#                      avg_sentence_length(words, sentences), punctuation_ratio(text, words), 
+#                      TTR(words), hapax_legomena(words), readability_metrics(sentences)[0],
+#                      readability_metrics(sentences)[3],
+#                      digits(words), superlatives(words),
+#                      special_characters(words), index_of_coincidence(text)], dtype="object")
     
-    list_or_array = np.array([function_words(words), intensifier_words(words), 
-                    time_adverbs(words), readability_metrics(sentences)[1],
-                    readability_metrics(sentences)[2], LIWC(text)], dtype="object")
+#     list_or_array = np.array([function_words(words), intensifier_words(words), 
+#                     time_adverbs(words), readability_metrics(sentences)[1],
+#                     readability_metrics(sentences)[2], LIWC(text)], dtype="object")
     
-    return [int_or_float, list_or_array]
+#     return [int_or_float, list_or_array]
 
 
-def vectorize(text1, text2):
+# def vectorize(text1, text2):
     
-    def difference(num1, num2):
-        dif = np.subtract(max(num1, num2), min(num1, num2))
-        return dif
+#     def difference(num1, num2):
+#         dif = np.subtract(max(num1, num2), min(num1, num2))
+#         return dif
 
-    def cosine_sim(vec1, vec2):
-        sim = spatial.distance.cosine(vec1, vec2)
-        return sim
+#     def cosine_sim(vec1, vec2):
+#         sim = spatial.distance.cosine(vec1, vec2)
+#         return sim
     
-    words1, sentences1 = tokenizer(text1)
-    words2, sentences2 = tokenizer(text2)
+#     words1, sentences1 = tokenizer(text1)
+#     words2, sentences2 = tokenizer(text2)
     
-    nums1 = combined(text1, words1, sentences1)[0]
-    vecs1 = combined(text1, words1, sentences1)[1]
-    nums2 = combined(text2, words2, sentences2)[0]
-    vecs2 = combined(text2, words2, sentences2)[1]
+#     nums1 = combined(text1, words1, sentences1)[0]
+#     vecs1 = combined(text1, words1, sentences1)[1]
+#     nums2 = combined(text2, words2, sentences2)[0]
+#     vecs2 = combined(text2, words2, sentences2)[1]
 
-    feat_vec_part_one = np.zeros(len(nums1))
-    feat_vec_part_two = np.zeros(len(vecs1))
+#     feat_vec_part_one = np.zeros(len(nums1))
+#     feat_vec_part_two = np.zeros(len(vecs1))
     
-    for i in range(len(nums1)):
-        feat_vec_part_one[i] = difference(nums1[i], nums2[i])
+#     for i in range(len(nums1)):
+#         feat_vec_part_one[i] = difference(nums1[i], nums2[i])
 
-    for i in range(len(vecs1)):
-        feat_vec_part_two[i] = cosine_sim(vecs1[i], vecs2[i])
+#     for i in range(len(vecs1)):
+#         feat_vec_part_two[i] = cosine_sim(vecs1[i], vecs2[i])
 
         
-    feat_vec = np.hstack([feat_vec_part_one, feat_vec_part_two])
+#     feat_vec = np.hstack([feat_vec_part_one, feat_vec_part_two])
     
-    return feat_vec
+#     return feat_vec
 
-def create_input_matrix(data_frame):
+# def create_input_matrix(data_frame):
     
-    vectors = []
-    for i in range(len(data_frame)):
-        vector = vectorize(data_frame.loc[i][2][0], data_frame.loc[i][2][1])
-        vectors.append(vector)
+#     vectors = []
+#     for i in range(len(data_frame)):
+#         vector = vectorize(data_frame.loc[i][2][0], data_frame.loc[i][2][1])
+#         vectors.append(vector)
     
-    matrix = np.stack(vectors, axis = 1)
+#     matrix = np.stack(vectors, axis = 1)
 
-    return matrix.T
+#     return matrix.T
         
-data = textimport_light(rawData, True)
-matrix = create_input_matrix(data[0:100])
+# data = textimport_light(rawData, True)
+# matrix = create_input_matrix(data[0:100])
 
-def getFeatures(text):
-    return features
+# def getFeatures(text):
+#     return features
 
-#for index, row in enumerate(data[:10]):
- #   text1 = data[index]['pair'][0]
-  #  text2 = data[index]['pair'][1]
+# #for index, row in enumerate(data[:10]):
+#  #   text1 = data[index]['pair'][0]
+#   #  text2 = data[index]['pair'][1]
     
-   # words1, sentences1 = tokenizer(text1)
-   # words2, sentences2 = tokenizer(text2)
+#    # words1, sentences1 = tokenizer(text1)
+#    # words2, sentences2 = tokenizer(text2)
     
-   # data[index]['features'] = [np.hstack((combined(text1, words1, sentences1))), np.hstack((combined(text2, words2, sentences2)))]
+#    # data[index]['features'] = [np.hstack((combined(text1, words1, sentences1))), np.hstack((combined(text2, words2, sentences2)))]
 
-# with open ('data2289-withFeatures.pkl', 'wb') as f:
-#     pickle.dump(data,f)
+# # with open ('data2289-withFeatures.pkl', 'wb') as f:
+# #     pickle.dump(data,f)
 
-# with open('data2289-withFeatures.pkl', 'rb') as f:
-#    mynewlist = pickle.load(f)
-
-#%%
-X = []
-# for index, row in enumerate(data):
-    # X.append(data[index]['features'])
-
-# Y = []
-# Y = labels['same']
-
-#%%
+# # with open('data2289-withFeatures.pkl', 'rb') as f:
+# #    mynewlist = pickle.load(f)
