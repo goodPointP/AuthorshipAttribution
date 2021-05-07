@@ -8,6 +8,7 @@ from scipy import spatial
 import liwc
 import re
 from collections import Counter
+from pos_function2 import pos_tag
 
 #%%
 # RUN ONLY ONCE
@@ -114,7 +115,6 @@ def readability_metrics(corpus):
     return scores, word_types, avg_syllables
 
 
-
 def LIWC(corpus):
 
     def liwc_tokenize(text):
@@ -189,6 +189,34 @@ def index_of_coincidence(text):
     # ioc = sum(chances)/((len(text) * (len(text)-1)))
     ioc = frequencySum / (N*(N-1)) #* (normalizing_coef/(N*(N-1)))
     return ioc
+
+#%%
+#These functions take POS tags, not corpora as input
+
+def adj_adv_ratio(pos_tags):
+    
+    adj_adv = ["JJ", "JJR", "JJS", "RB", "RBR", "RBS"]
+    adj_adv_rat = []
+    for i, j in enumerate(pos_tags):
+        co = Counter()
+        co.update({x:pos_tags[i].count(x) for x in adv_adj})
+        ratio = sum(list(dict(co).values())) / len(pos_tags[i])
+        adj_adv_rat.append(ratio)
+        
+    return adj_adv_rat
+
+#This is a very simple approach but a more elaborate one would require advanced parsing
+def simple_tense(pos_tags):
+    tense_ratio = []
+    for i, j in enumerate(pos_tags):
+        future = len([word for word in pos_tags[i] if word in ["VBC", "VBF"]]) / len(pos_tags[i])
+        present = len([word for word in pos_tags[i] if word in ["VBG", "VBP", "VBZ"]]) / len(pos_tags[i])
+        past = len([word for word in pos_tags[i] if word in ["VBD", "VBN"]]) / len(pos_tags[i])
+        tense = [future, present, past]
+        tense_ratio.append(tense)
+    return tense_ratio
+
+#%%
 
 # #%%
 
