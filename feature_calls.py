@@ -1,15 +1,19 @@
 from functions import *
 from feature_extraction_seb import *
-from readability import Readability
+from ngrams import *
+from pos_function2 import skipgramming
+from scipy import spatial
+from sklearn.metrics.pairwise import cosine_distances
+#from readability import Readability
 import textstat #pip install textstat
 import pandas as pd
+
 #%%
 
-rawData = read_data()
-rawTruths = read_truth_data()
-data = textimport_light(rawData)
-#%%
-idx, corpus = remove_duplicates(data[:100])
+raw_data = read_data()
+df = textimport_light(raw_data, pandas_check = True)
+text_IDs, text_uniques = remove_duplicates(df)
+df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 
 #%%
 def preprocessing_complete(corpus):
@@ -19,8 +23,14 @@ def preprocessing_complete(corpus):
     minus_both = remove_punc_stop(corpus)
     return [corpus, minus_punc, minus_stop, minus_both]
 
+def dist(inp1, inp2):
+    return abs(inp1 - inp2)
+    
+def cosine(inp1, inp2):
+    return cosine_distances(inp1, inp2)
+
 #%%
-corpora = preprocessing_complete(corpus)                                #0.8s / 100 texts
+corpora = preprocessing_complete(text_uniques[0:100])                   #0.8s / 100 texts
 #%%
 
 def arrays_combined(corpora):                                           #9.5s / 100 texts
@@ -35,6 +45,8 @@ def arrays_combined(corpora):                                           #9.5s / 
     liwc = LIWC(corpora[1])                                             #1.9s
     rm_s, rm_wt, rm_avg_s = readability_metrics(corpora[1])             #4.6s
     ttr = TTR(corpora[1])                                               #0.1s
+    w_tg = tfidf_word_ngrams(corpora[1], 3,3)
+    c_tg = tfidf_char_ngrams(corpora[1], 3,3)
     
     # corpora[2] = stopwords removed
     pr = punctuation_ratio(corpora[2])                                  #0.3s
@@ -43,18 +55,28 @@ def arrays_combined(corpora):                                           #9.5s / 
     # corpora[3] = both removed
     iw = intensifier_words(corpora[3])                                  #0.08s
     ta = time_adverbs(corpora[3])                                       #0.09s
-    dgt = digits(corpora[3])                                            #0.2s
-    return list(zip(*(asl, awl, fwf, fws, hl, liwc, rm_s, rm_wt, rm_avg_s, ttr, pr, sc, iw, ta, dgt))) 
+    dgt = digits(corpora[3])
     
-
+    #returns one list for float output, one for lists, and one where the output is already sim or cos
+    return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt))), list(zip(fwf, liwc, fwf, iw, ta)), list([w_tg, c_tg])
+            
 
 #%%
 
-test = arrays_combined(corpora)
+floats, arrays, sims = arrays_combined(corpora)
     
 #%%
+floats_array = np.array([float_ for float_ in floats], dtype=object)
+tagged_pairs_one = floats_array[np.array(list(df['text_id'][:int(len(corpora[0])/2)]))] 
+sim = [dist(pair[0], pair[1]) for pair in tagged_pairs_one]
+
+array_array = np.array([array_ for array_ in arrays])
+tagged_pairs_two = array_array[np.array(list(df['text_id'][:int(len(corpora[0])/2)]))] 
+tagged_pairs_split = [p for p in tagged_pairs_two]
+cos = [cosine(np.ndarray(pair[0], dtype="float"), np.ndarray(pair[1], dtype="float")) for pair in tagged_pairs_split]
 
 
+#%%
 def readability_metrics2(corpus):
     
     scores = []
