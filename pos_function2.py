@@ -113,10 +113,10 @@ if __name__ == '__main__':
 #%%
 
 # cosine_similarities = pos_tag()
-allResults = []
-for result in results:
-    allResults.append(result.get())
+# allResults = []
+# for result in results:
+#     allResults.append(result.get())
 
-allResults = list(itertools.chain(*allResults))
+# allResults = list(itertools.chain(*allResults))
 
-finalRes = skipgramming(allResults)
+# finalRes = skipgramming(allResults)
