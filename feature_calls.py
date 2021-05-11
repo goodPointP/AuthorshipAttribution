@@ -1,16 +1,13 @@
-
 from functions import *
 from feature_extraction_seb import *
 from ngrams import *
 # from pos_function2 import skipgramming
 from scipy import spatial
 from sklearn.metrics.pairwise import cosine_distances
-#from readability import Readability
 import textstat #pip install textstat
 import pandas as pd
 
 #%%
-
 raw_data = read_data()
 df = textimport_light(raw_data, pandas_check = True)
 text_IDs, text_uniques = remove_duplicates(df)
@@ -30,11 +27,12 @@ def dist(inp1, inp2):
 def cosine(inp1, inp2):
     return cosine_distances(inp1, inp2)
 
-#%%
 corpora = preprocessing_complete(text_uniques[0:100])                   #0.8s / 100 texts
+num_pairs = int(len(corpora[0]) / 2)
+
 #%%
 
-def arrays_combined(corpora):                                           #9.5s / 100 texts
+def calls(corpora):                                           #9.5s / 100 texts
     
     # corpora[0] = no preprocessing
     asl = avg_sentence_length(corpora[0])                               #0.5s
@@ -62,36 +60,44 @@ def arrays_combined(corpora):                                           #9.5s / 
     return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt))), list(zip(*(fwf, liwc, fwf, iw, ta))), list(zip(*(w_tg, c_tg)))
             
 
-#%%
+#%% 26.5s for 100 texts...
 
-floats, arrays, sims = arrays_combined(corpora)
+def arrays_combined(corpora):
     
-#%%
-floats_array = np.array([float_ for float_ in floats], dtype=object)
-tagged_pairs_one = floats_array[np.array(list(df['text_id'][:int(len(corpora[0])/2)]))] 
-sim = [dist(pair[0], pair[1]) for pair in tagged_pairs_one]
-# %%time
+    floats, arrays, sims = calls(corpora)
+    
+    floats_matrix = np.array([float_ for float_ in floats], dtype=object)
+    tagged_pairs_one = floats_matrix[np.array(list(df['text_id'][:num_pairs]))]
+    distance_matrix = np.stack([dist(pair[0], pair[1]) for pair in tagged_pairs_one])
+    
+    array_matrix = np.array([array_ for array_ in arrays], dtype = object)
+    tagged_pairs_two = array_matrix[np.array(list(df['text_id'][:num_pairs]))]
+    tagged_pairs_split = [p for p in tagged_pairs_two]
+    
+    cos = []
+    
+    for pair in tagged_pairs_split:
+        featuresFirst = [feature for feature in pair[0]]
+        featuresSecond = [feature for feature in pair[1]]
+    
+        for i, feature in enumerate(pair[0]):
+            feature_vector_1 = np.array(featuresFirst[i]).reshape(1,-1)
+            feature_vector_2 = np.array(featuresSecond[i]).reshape(1,-1)
+            cos.append(float(cosine(feature_vector_1, feature_vector_2)))
+    
+    cos_matrix = np.stack(np.array_split(np.array((cos)), 50))
+    
+    sim_matrix = np.stack(sims)
+    feature_matrix = np.hstack((distance_matrix, cos_matrix, sim_matrix))
 
-array_array = np.array([array_ for array_ in arrays])
-tagged_pairs_two = np.array(arrays)[np.array(list(df['text_id'][:int(len(corpora[1])/2)]))]
-tagged_pairs_split = [p for p in tagged_pairs_two]
-# cos = [cosine(np.ndarray(np.asarray(pair[0], dtype="float"), np.ndarray(pair[1], dtype="float")) for pair in tagged_pairs_split]
-cos = []
-for pair in tagged_pairs_split:
-    featuresFirst = []
-    featuresSecond = []
-    
-    for feature in pair[0]:
-        featuresFirst.append(feature)
-    for feature in pair[1]:
-        featuresSecond.append(feature)
-    
-    for i, feature in enumerate(pair[0]):
-        feature_vector_1 = np.array(featuresFirst[i]).reshape(1,-1)
-        feature_vector_2 = np.array(featuresSecond[i]).reshape(1,-1)
-        cos.append(cosine(feature_vector_1, feature_vector_2))
-        # cos.append(cosine(np.array(feature[0]).reshape(1,-1), np.array(feature[1]).reshape(1,-1)))
-    
+    return feature_matrix
+
+
+#%%
+%%time
+
+test = arrays_combined(corpora)
+
 
 #%%
 def readability_metrics2(corpus):
