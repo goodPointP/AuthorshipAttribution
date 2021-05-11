@@ -14,18 +14,6 @@ text_IDs, text_uniques = remove_duplicates(df)
 df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 
 #%%
-def preprocessing_complete(corpus):
-    corpus = list(corpus)
-    minus_punc = remove_punc(corpus)
-    minus_stop = remove_stop(corpus)
-    minus_both = remove_punc_stop(corpus)
-    return [corpus, minus_punc, minus_stop, minus_both]
-
-def dist(inp1, inp2):
-    return abs(inp1 - inp2)
-    
-def cosine(inp1, inp2):
-    return cosine_distances(inp1, inp2)
 
 batch_size = 100
 corpora = preprocessing_complete(text_uniques[0:batch_size])                   #0.8s / 100 texts
@@ -44,7 +32,7 @@ def calls(corpora):                                           #9.5s / 100 texts
     fwf, fws = function_words(corpora[1])                               #0.8s
     hl = hapax_legomena(corpora[1])                                     #0.5s
     liwc = LIWC(corpora[1])                                             #1.9s
-    # rm_s, rm_wt, rm_avg_s = readability_metrics(corpora[1])             #4.6s
+    # rm_s, rm_wt, rm_avg_s = readability_metrics(corpora[1])           #4.6s
     ttr = TTR(corpora[1])                                               #0.1s
     w_tg = tfidf_word_ngrams(corpora[1], 3,3)
     c_tg = tfidf_char_ngrams(corpora[1], 3,3)
@@ -101,12 +89,6 @@ def arrays_combined(corpora):
 
 
 #%%
-%%time
-
-test = arrays_combined(corpora)
-
-
-#%%
 def readability_metrics2(corpus):
     
     scores = []
@@ -147,9 +129,6 @@ w_classes = ['auxverb', 'conjunction','nominalization',
 begin_types = ['article','conjunction','interrogative'
                ,'preposition','pronoun','subordination']
 
-#%%
-%%time
-f = readability_metrics2(corpora[1])
 
         
 

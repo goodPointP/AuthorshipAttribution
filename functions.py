@@ -8,6 +8,7 @@ import pickle
 import re
 from nltk.corpus import stopwords
 from collections import Counter
+from sklearn.metrics.pairwise import cosine_distances
 
 def read_data():
     with open('data/dataShuffled.pkl', 'rb') as f:
@@ -94,5 +95,18 @@ def split_data(data, truth):
     X_train, X_test, y_train, y_test = train_test_split(
     data, truth, test_size=0.25, random_state=42)
     return X_train, X_test, y_train, y_test
+
+def preprocessing_complete(corpus):
+    corpus = list(corpus)
+    minus_punc = remove_punc(corpus)
+    minus_stop = remove_stop(corpus)
+    minus_both = remove_punc_stop(corpus)
+    return [corpus, minus_punc, minus_stop, minus_both]
+
+def dist(inp1, inp2):
+    return abs(inp1 - inp2)
     
+def cosine(inp1, inp2):
+    return cosine_distances(inp1, inp2)
+
 

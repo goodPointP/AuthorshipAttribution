@@ -93,8 +93,6 @@ if __name__ == '__main__':
 
 #%%
 
-#=======
-#>>>>>>> 423c13bed3e92eac07b4b711ff45739586818f48
 text_list = pd.Series(df['pair'].explode())
 numProc = 8
 step = len(text_list)/numProc
@@ -121,7 +119,6 @@ if __name__ == '__main__':
 #%%
 
 # cosine_similarities = pos_tag()
-#<<<<<<< HEAD
 #allResults = []
 #for result in results:
  #   allResults.append(result.get())
@@ -129,7 +126,6 @@ if __name__ == '__main__':
 #allResults = list(itertools.chain(*allResults))
 
 #finalRes = skipgramming(allResults)
-#=======
 # allResults = []
 # for result in results:
 #     allResults.append(result.get())
@@ -137,4 +133,3 @@ if __name__ == '__main__':
 # allResults = list(itertools.chain(*allResults))
 
 # finalRes = skipgramming(allResults)
-#>>>>>>> 423c13bed3e92eac07b4b711ff45739586818f48

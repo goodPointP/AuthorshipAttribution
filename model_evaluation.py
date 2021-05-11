@@ -7,27 +7,29 @@ from sklearn import metrics
 from sklearn.experimental import enable_halving_search_cv
 from sklearn.model_selection import RepeatedStratifiedKFold, GridSearchCV, HalvingGridSearchCV
 from functions import *
+from feature_calls import calls, arrays_combined
 import numpy as np
-from feature_extraction import create_input_matrix
 
 #%%
-rawData = read_data()
-data = textimport_light(rawData, True)
-rawTruth = read_truth_data()
+batch_size = 100
+
+raw_data = read_data()
+df = textimport_light(raw_data, pandas_check = True)
+text_IDs, text_uniques = remove_duplicates(df)
+df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 truths = truthimport_light(rawTruth)
 labels = truths['same'] 
 cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
+corpora = preprocessing_complete(text_uniques[0:batch_size])                  
 
 #%%
-#Text pairs to include
-samples = int(100)
 
 #deal with Nan values, normalize data
 imputer = SimpleImputer(missing_values=np.nan, strategy='most_frequent')
-input_matrix = normalize(imputer.fit_transform(create_input_matrix(data[0:samples])))
+input_matrix = normalize(imputer.fit_transform(arrays_combined(corpora)))
 
 #split into train and test sets
-X_train, X_test, y_train, y_test = split_data(input_matrix, labels[0:samples])
+X_train, X_test, y_train, y_test = split_data(input_matrix, labels[0:batch_size])
 
 
 #%%
