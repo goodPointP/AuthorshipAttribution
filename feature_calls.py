@@ -1,7 +1,7 @@
 from functions import *
 from feature_extraction_seb import *
 from ngrams import *
-# from pos_function2 import skipgramming
+from POS import pos_tag, skipgramming
 from scipy import spatial
 from sklearn.metrics.pairwise import cosine_distances
 import textstat #pip install textstat
@@ -27,7 +27,9 @@ def dist(inp1, inp2):
 def cosine(inp1, inp2):
     return cosine_distances(inp1, inp2)
 
-corpora = preprocessing_complete(text_uniques[0:100])                   #0.8s / 100 texts
+batch_size = 100
+corpora = preprocessing_complete(text_uniques[0:batch_size])                   #0.8s / 100 texts
+pos = pos_tag(int(len(corpora[0])))
 num_pairs = int(len(corpora[0]) / 2)
 
 #%%
@@ -56,9 +58,14 @@ def calls(corpora):                                           #9.5s / 100 texts
     ta = time_adverbs(corpora[3])                                       #0.09s
     dgt = digits(corpora[3])
     
+    #pos_tags as input
+    st = skipgramming(pos)
+    adj_adv = adj_adv_ratio(pos)
+    si_t = simple_tense(pos)
+    
     #returns one list for float output, one for lists, and one where the output is already sim or cos
-    return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt))), list(zip(*(fwf, liwc, fwf, iw, ta))), list(zip(*(w_tg, c_tg)))
-            
+    return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt, adj_adv))), list(zip(*(fwf, liwc, fwf, iw, ta, si_t))), list(zip(*(w_tg, c_tg, st)))
+
 
 #%% 26.5s for 100 texts...
 

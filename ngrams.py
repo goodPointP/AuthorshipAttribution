@@ -36,12 +36,3 @@ def tfidf_char_ngrams(corpus, min_n, max_n):
 
     return np.concatenate(cos, axis = 0)
 
-if __name__ == '__main__':
-    start = time.time()
-    #three = tfidf_word_ngrams(text_uniques, 1, 1) # 111s
-    four = tfidf_char_ngrams(text_uniques[0:100], 3, 3)
-    end = time.time()
-    
-    print(end - start)
-
-#%%
