@@ -13,9 +13,10 @@ from pos_function2 import pos_tag
 #%%
 # RUN ONLY ONCE
 # read the data
-rawData = read_data()
-rawTruths = read_truth_data()
-data = textimport_light(rawData)
+if __name__ == '__main__':
+    rawData = read_data()
+    rawTruths = read_truth_data()
+    data = textimport_light(rawData)
 
 #%%
 

@@ -1,7 +1,8 @@
+
 from functions import *
 from feature_extraction_seb import *
 from ngrams import *
-from pos_function2 import skipgramming
+# from pos_function2 import skipgramming
 from scipy import spatial
 from sklearn.metrics.pairwise import cosine_distances
 #from readability import Readability
@@ -43,7 +44,7 @@ def arrays_combined(corpora):                                           #9.5s / 
     fwf, fws = function_words(corpora[1])                               #0.8s
     hl = hapax_legomena(corpora[1])                                     #0.5s
     liwc = LIWC(corpora[1])                                             #1.9s
-    rm_s, rm_wt, rm_avg_s = readability_metrics(corpora[1])             #4.6s
+    # rm_s, rm_wt, rm_avg_s = readability_metrics(corpora[1])             #4.6s
     ttr = TTR(corpora[1])                                               #0.1s
     w_tg = tfidf_word_ngrams(corpora[1], 3,3)
     c_tg = tfidf_char_ngrams(corpora[1], 3,3)
@@ -58,7 +59,7 @@ def arrays_combined(corpora):                                           #9.5s / 
     dgt = digits(corpora[3])
     
     #returns one list for float output, one for lists, and one where the output is already sim or cos
-    return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt))), list(zip(fwf, liwc, fwf, iw, ta)), list([w_tg, c_tg])
+    return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt))), list(zip(*(fwf, liwc, fwf, iw, ta))), list(zip(*(w_tg, c_tg)))
             
 
 #%%
@@ -69,12 +70,28 @@ floats, arrays, sims = arrays_combined(corpora)
 floats_array = np.array([float_ for float_ in floats], dtype=object)
 tagged_pairs_one = floats_array[np.array(list(df['text_id'][:int(len(corpora[0])/2)]))] 
 sim = [dist(pair[0], pair[1]) for pair in tagged_pairs_one]
+# %%time
 
 array_array = np.array([array_ for array_ in arrays])
-tagged_pairs_two = array_array[np.array(list(df['text_id'][:int(len(corpora[0])/2)]))] 
+tagged_pairs_two = np.array(arrays)[np.array(list(df['text_id'][:int(len(corpora[1])/2)]))]
 tagged_pairs_split = [p for p in tagged_pairs_two]
-cos = [cosine(np.ndarray(pair[0], dtype="float"), np.ndarray(pair[1], dtype="float")) for pair in tagged_pairs_split]
-
+# cos = [cosine(np.ndarray(np.asarray(pair[0], dtype="float"), np.ndarray(pair[1], dtype="float")) for pair in tagged_pairs_split]
+cos = []
+for pair in tagged_pairs_split:
+    featuresFirst = []
+    featuresSecond = []
+    
+    for feature in pair[0]:
+        featuresFirst.append(feature)
+    for feature in pair[1]:
+        featuresSecond.append(feature)
+    
+    for i, feature in enumerate(pair[0]):
+        feature_vector_1 = np.array(featuresFirst[i]).reshape(1,-1)
+        feature_vector_2 = np.array(featuresSecond[i]).reshape(1,-1)
+        cos.append(cosine(feature_vector_1, feature_vector_2))
+        # cos.append(cosine(np.array(feature[0]).reshape(1,-1), np.array(feature[1]).reshape(1,-1)))
+    
 
 #%%
 def readability_metrics2(corpus):
