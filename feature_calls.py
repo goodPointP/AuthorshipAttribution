@@ -6,6 +6,8 @@ from scipy import spatial
 from sklearn.metrics.pairwise import cosine_distances
 import textstat #pip install textstat
 import pandas as pd
+import time
+import readability
 
 #%%
 raw_data = read_data()
@@ -14,11 +16,15 @@ text_IDs, text_uniques = remove_duplicates(df)
 df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 
 #%%
+start = time.time()
 
-batch_size = 200
-corpora = preprocessing_complete(text_uniques[0:batch_size])                   #0.8s / 100 texts
+batch_size = 100
+corpora = preprocessing_complete(text_uniques[0:batch_size])                   #0.8s / 100 texts 
 pos = pos_tag(int(len(corpora[0])))
 num_pairs = int(len(corpora[0]) / 2)
+
+end = time.time()
+print(f"Execution time was {end-start}s")
 
 #%%
 
@@ -100,7 +106,7 @@ def readability_metrics2(corpus):
        # line_sep = '.\n'.join(sentences)
         # readability_results = Readability(text)
         # scores.append(Readability(text).flesch_kincaid())
-        scores.append(textstat.flesch_kincaid_grade(text))
+        scores.append([textstat.flesch_kincaid_grade(text), textstat.syllable_count(text)])
         # begin_types = ['article','conjunction','interrogative'
         #                ,'preposition','pronoun','subordination']
         
@@ -119,6 +125,13 @@ def readability_metrics2(corpus):
         
     ## WE NEED: flesch_kincaid, avg_syllables, word_types (look at readability what it does)
     return  scores#, avg_syllables #word_types
+
+#%%
+start = time.time()
+readability_scores = readability_metrics2(corpora[0])
+
+end = time.time()
+print(f"Execution time was {end-start}s")
 
 #%%
 feature_matrix = arrays_combined(corpora)
