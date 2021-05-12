@@ -1,5 +1,5 @@
 from functions import *
-from feature_extraction_seb import *
+from feature_extraction import *
 from ngrams import *
 from POS import pos_tag, skipgramming
 from scipy import spatial
@@ -15,7 +15,7 @@ df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 
 #%%
 
-batch_size = 100
+batch_size = 200
 corpora = preprocessing_complete(text_uniques[0:batch_size])                   #0.8s / 100 texts
 pos = pos_tag(int(len(corpora[0])))
 num_pairs = int(len(corpora[0]) / 2)
@@ -117,18 +117,8 @@ def readability_metrics2(corpus):
         # syllables = [readability_results['sentence info']['syll_per_word']]
         # avg_syllables.append(syllables)
         
+    ## WE NEED: flesch_kincaid, avg_syllables, word_types (look at readability what it does)
     return  scores#, avg_syllables #word_types
 
 #%%
-
-text = corpora[1][0]
-# readability_results = readability.getmeasures(text, lang='en') #21ms
-w_classes = ['auxverb', 'conjunction','nominalization',
-                     'preposition','pronoun', 'tobeverb' ]
-   
-begin_types = ['article','conjunction','interrogative'
-               ,'preposition','pronoun','subordination']
-
-
-        
-
+feature_matrix = arrays_combined(corpora)

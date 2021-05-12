@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Apr 27 18:34:23 2021
-
-@author: John
-"""
 from functions import *
 import random
 

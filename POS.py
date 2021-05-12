@@ -11,22 +11,21 @@ from scipy import spatial
 from multiprocessing import Pool
 import itertools
 #%%
-
-rawData = read_data()
-rawTruths = read_truth_data()
-df = textimport_light(rawData)
-df_truth = truthimport_light(rawTruths)
-
-#%%
-
-text_list = pd.Series(df['pair'].explode())
-text_IDs, text_uniques = text_list.factorize()
-df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
+def importDataPOS():
+    rawData = read_data()
+    rawTruths = read_truth_data()
+    df = textimport_light(rawData)
+    text_list = pd.Series(df['pair'].explode())
+    text_IDs, text_uniques = text_list.factorize()
+    df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
+    return df
 
 #%%
 
 def pos_tag(ntexts):
     
+    ## TODO implement multithreading inside the function
+    df = importDataPOS()
     text_list = pd.Series(df['pair'].explode())[:ntexts]
     nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
     
@@ -44,6 +43,8 @@ def pos_tag(ntexts):
     
 def skipgramming(tags, return_counts=False):
     #skipgram-creation
+    df = importDataPOS()
+    
     no = int(len(tags))
     skips = [dict(Counter(skipgrams(tagset, 2, 2)).most_common(200)) for tagset in tags]
     base = dict.fromkeys(dict(ChainMap(*skips)), 0)
@@ -82,36 +83,37 @@ def skipgramming(tags, return_counts=False):
     
 #%%
 if __name__ == '__main__':
+    df = importDataPOS()
     nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
     texts = pd.Series(df['pair'].explode())[:10]
 
 #%%
-#<<<<<<< HEAD
+
 if __name__ == '__main__':
     pos = pos_tag(100)
     skip = skipgramming(pos)
 
 #%%
-
-text_list = pd.Series(df['pair'].explode())
-numProc = 8
-step = len(text_list)/numProc
-
-results = [[] for i in range(numProc)]
-
-# t1 = Thread(target = pos_tag)
-# t2 = Thread(target = pos_tag, args=(50))
 if __name__ == '__main__':
-    # startTime = timer()
-    with Pool(processes=numProc) as pool:         # start 4 worker processes
-        for i in range(numProc):
-            start = step * i
-            end = start + step
-
-            results[i] = pool.apply_async(pos_tag, args=(text_list[int(start):int(end)],))
-            
-        pool.close()
-        pool.join()
+    text_list = pd.Series(df['pair'].explode())
+    numProc = 8
+    step = len(text_list)/numProc
+    
+    results = [[] for i in range(numProc)]
+    
+    # t1 = Thread(target = pos_tag)
+    # t2 = Thread(target = pos_tag, args=(50))
+    if __name__ == '__main__':
+        # startTime = timer()
+        with Pool(processes=numProc) as pool:         # start 4 worker processes
+            for i in range(numProc):
+                start = step * i
+                end = start + step
+    
+                results[i] = pool.apply_async(pos_tag, args=(text_list[int(start):int(end)],))
+                
+            pool.close()
+            pool.join()
     # endTime = timer()
     
     # print (f"It took {endTime-startTime}s to run.")
