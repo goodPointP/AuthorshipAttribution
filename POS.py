@@ -8,8 +8,8 @@ import string
 import re
 from nltk.util import skipgrams
 from scipy import spatial
-from multiprocessing import Pool
 import itertools
+
 #%%
 def importDataPOS():
     rawData = read_data()
@@ -24,7 +24,7 @@ def importDataPOS():
 
 def pos_tag(ntexts):
     
-    ## TODO implement multithreading inside the function
+    
     df = importDataPOS()
     text_list = pd.Series(df['pair'].explode())[:ntexts]
     nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])

@@ -8,6 +8,7 @@ import numpy as np
 from scipy import spatial
 import liwc
 import re
+import textstat
 from collections import Counter
 
 #%%
@@ -84,36 +85,22 @@ def hapax_legomena(corpus):
         haps.append(len(FreqDist(text.split()).hapaxes()) / len(text))
     return haps
 
-### Fixed but horribly slow and I don't know how to make more efficient
 ### Index to get different measures
 def readability_metrics(corpus):
     
-    scores = []
-    sentence_beginnings = []
-    word_types = []
+    flesch_kincaid = []
     avg_syllables = []
-    
+    avg_char_per_word = []
+    avg_difficult_words = []
+
     for text in corpus:
-       # line_sep = '.\n'.join(sentences)
-        readability_results = readability.getmeasures(text, lang='en')
+        flesch_kincaid.append(textstat.flesch_kincaid_grade(text))
+        avg_syllables.append(textstat.avg_syllables_per_word(text))
         
-        begin_types = ['article','conjunction','interrogative'
-                       ,'preposition','pronoun','subordination']
-        
-        w_classes = ['auxverb', 'conjunction','nominalization',
-                     'preposition','pronoun', 'tobeverb' ]
-        
-        red_score = readability_results['readability grades']['Kincaid']
-        scores.append(red_score)
-        
-        types = [readability_results['word usage'][i] for i in w_classes]
-        types_ratio = [r / len(text) for r in types]
-        word_types.append(types_ratio)
-        
-        syllables = [readability_results['sentence info']['syll_per_word']]
-        avg_syllables.append(syllables)
-        
-    return scores, word_types, avg_syllables
+        # very slow!
+        # avg_difficult_words.append(textstat.difficult_words(text)/len(text.split()))
+
+    return flesch_kincaid, avg_syllables#, avg_difficult_words
 
 
 def LIWC(corpus):
@@ -170,25 +157,19 @@ def digits(corpus):
         digits.append(sum(c.isnumeric() for c in text) / len(text))
     return digits
 
-def index_of_coincidence(text):
-    # TODO: REMOVE PUNCTUATION
+def index_of_coincidence(corpus):
     normalizing_coef = 26.0 #26 for english
-    text = remove_punctuation(text)
-    text = remove_spaces(text)
-    text = text.upper()
-    
-    N = len(text)
-    
-    # chances = []
-    frequencySum = 0.0
-    for letter in string.ascii_uppercase:
-        frequencySum += float(text.count(letter)) * (float(text.count(letter))-1)
-        # chances.append( (text.count(letter) * (text.count(letter)-1))/(len(text) * (len(text)-1)) )
-    
-    # print(chances)
-    # print(sum(chances))
-    # ioc = sum(chances)/((len(text) * (len(text)-1)))
-    ioc = frequencySum / (N*(N-1)) #* (normalizing_coef/(N*(N-1)))
+    ioc = []
+    for text in corpus:
+        text = remove_spaces(text)
+        text = text.upper()
+        
+        frequencySum = 0.0
+        for letter in string.ascii_uppercase:
+            frequencySum += float(text.count(letter)) * (float(text.count(letter))-1)
+            
+        N = len(text)
+        ioc.append(frequencySum / (N*(N-1)) ) #* (normalizing_coef/(N*(N-1)))
     return ioc
 
 #%%

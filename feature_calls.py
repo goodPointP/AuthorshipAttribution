@@ -8,6 +8,8 @@ import textstat #pip install textstat
 import pandas as pd
 import time
 import readability
+from multiprocessing import Pool
+import psutil
 
 #%%
 raw_data = read_data()
@@ -17,13 +19,12 @@ df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 
 #%%
 start = time.time()
-
 batch_size = 100
-corpora = preprocessing_complete(text_uniques[0:batch_size])                   #0.8s / 100 texts 
+corpora = preprocessing_complete(text_uniques[0:batch_size])  
 pos = pos_tag(batch_size)
 num_pairs = int(batch_size/2)
-
 end = time.time()
+
 print(f"Execution time was {end-start}s")
 
 #%%
@@ -38,10 +39,11 @@ def calls(corpora):                                           #9.5s / 100 texts
     fwf, fws = function_words(corpora[1])                               #0.8s
     hl = hapax_legomena(corpora[1])                                     #0.5s
     liwc = LIWC(corpora[1])                                             #1.9s
-    # rm_s, rm_wt, rm_avg_s = readability_metrics(corpora[1])           #4.6s
+    fl_kinc, avg_syll = readability_metrics(corpora[1])                 #1.45s
     ttr = TTR(corpora[1])                                               #0.1s
     w_tg = tfidf_word_ngrams(corpora[1], 3,3)
     c_tg = tfidf_char_ngrams(corpora[1], 3,3)
+    i_o_c = index_of_coincidence(corpora[1])                            #0.06s
     
     # corpora[2] = stopwords removed
     pr = punctuation_ratio(corpora[2])                                  #0.3s
@@ -58,7 +60,7 @@ def calls(corpora):                                           #9.5s / 100 texts
     si_t = simple_tense(pos)
     
     #returns one list for float output, one for lists, and one where the output is already sim or cos
-    return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt, adj_adv))), list(zip(*(fwf, liwc, fwf, iw, ta, si_t))), list(zip(*(w_tg, c_tg, st)))
+    return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt, adj_adv, i_o_c, fl_kinc, avg_syll))), list(zip(*(fwf, liwc, fwf, iw, ta, si_t))), list(zip(*(w_tg, c_tg, st)))
 
 
 #%% 26.5s for 100 texts...
@@ -92,46 +94,6 @@ def arrays_combined(corpora):
     feature_matrix = np.hstack((distance_matrix, cos_matrix, sim_matrix))
 
     return feature_matrix
-
-
-#%%
-def readability_metrics2(corpus):
-    
-    scores = []
-    sentence_beginnings = []
-    word_types = []
-    avg_syllables = []
-    helper = []
-    for text in corpus:
-       # line_sep = '.\n'.join(sentences)
-        # readability_results = Readability(text)
-        # scores.append(Readability(text).flesch_kincaid())
-        scores.append([textstat.flesch_kincaid_grade(text), textstat.syllable_count(text)])
-        # begin_types = ['article','conjunction','interrogative'
-        #                ,'preposition','pronoun','subordination']
-        
-        # w_classes = ['auxverb', 'conjunction','nominalization',
-        #              'preposition','pronoun', 'tobeverb' ]
-        
-        # red_score = readability_results['readability grades']['Kincaid']
-        # scores.append(red_score)
-        
-        # types = [readability_results['word usage'][i] for i in w_classes]
-        # types_ratio = [r / len(text) for r in types]
-        # word_types.append(types_ratio)
-        
-        # syllables = [readability_results['sentence info']['syll_per_word']]
-        # avg_syllables.append(syllables)
-        
-    ## WE NEED: flesch_kincaid, avg_syllables, word_types (look at readability what it does)
-    return  scores#, avg_syllables #word_types
-
-#%%
-start = time.time()
-readability_scores = readability_metrics2(corpora[0])
-
-end = time.time()
-print(f"Execution time was {end-start}s")
 
 #%%
 feature_matrix = arrays_combined(corpora)
