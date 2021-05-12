@@ -20,8 +20,8 @@ start = time.time()
 
 batch_size = 100
 corpora = preprocessing_complete(text_uniques[0:batch_size])                   #0.8s / 100 texts 
-pos = pos_tag(int(len(corpora[0])))
-num_pairs = int(len(corpora[0]) / 2)
+pos = pos_tag(batch_size)
+num_pairs = int(batch_size/2)
 
 end = time.time()
 print(f"Execution time was {end-start}s")
@@ -86,7 +86,7 @@ def arrays_combined(corpora):
             feature_vector_2 = np.array(featuresSecond[i]).reshape(1,-1)
             cos.append(float(cosine(feature_vector_1, feature_vector_2)))
     
-    cos_matrix = np.stack(np.array_split(np.array((cos)), 50))
+    cos_matrix = np.stack(np.array_split(np.array((cos)), num_pairs))
     
     sim_matrix = np.stack(sims)
     feature_matrix = np.hstack((distance_matrix, cos_matrix, sim_matrix))
