@@ -22,10 +22,10 @@ df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 start = time.time()
 batch_size = 100
 corpora = preprocessing_complete(text_uniques[0:batch_size])  
-pos = pos_tag(batch_size) #for testing
+# pos = pos_tag(batch_size) #for testing
 
-with open('pos_tags_whole_text_4536.pkl', 'rb') as f:
-    pos_tags = pickle.load(f)
+with open('data/pos_tags_whole_text_4536.pkl', 'rb') as f:
+    pos = pickle.load(f)
     
 num_pairs = int(batch_size/2)
 end = time.time()
