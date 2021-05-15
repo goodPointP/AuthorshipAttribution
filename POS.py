@@ -1,7 +1,7 @@
 ### POS-tagging.py #0s
 import pandas as pd
 import numpy as np
-from functions import textimport_light, truthimport_light, read_data, read_truth_data
+from functions import textimport, textimport_light, truthimport_light, read_data, read_truth_data
 from collections import Counter,  ChainMap
 import spacy
 import string
@@ -14,7 +14,8 @@ import itertools
 def importDataPOS():
     rawData = read_data()
     rawTruths = read_truth_data()
-    df = textimport_light(rawData)
+    # df = textimport_light(rawData)
+    df = textimport(rawData)
     text_list = pd.Series(df['pair'].explode())
     text_IDs, text_uniques = text_list.factorize()
     df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
@@ -22,11 +23,11 @@ def importDataPOS():
 
 #%%
 
-def pos_tag(ntexts):
+def pos_tag():#ntexts):
     
     
     df = importDataPOS()
-    text_list = pd.Series(df['pair'].explode())[:ntexts]
+    text_list = pd.Series(df['pair'].explode())#[:ntexts]
     nlp = spacy.load("en_core_web_sm", exclude=["parser", "senter","ner"])
     
     #preprocessing
@@ -41,7 +42,7 @@ def pos_tag(ntexts):
         
     return tags
     
-def skipgramming(tags, return_counts=False):
+def skipgramming(tags, num_pairs, return_counts=False):
     #skipgram-creation
     df = importDataPOS()
     
@@ -72,7 +73,8 @@ def skipgramming(tags, return_counts=False):
     tf_idf = term_freq*doc_freq
     
     #cosine similarity
-    tagged_pairs = tf_idf[np.array(list(df['text_id'][:int(no/2)]))]
+    # tagged_pairs = tf_idf[np.array(list(df['text_id'][:int(no/2)]))]
+    tagged_pairs = tf_idf[np.array(list(df['text_id'][:num_pairs]))]
     cos = [spatial.distance.pdist(pair, metric='cosine') for pair in tagged_pairs]
     
     if return_counts==True:

@@ -14,19 +14,22 @@ import pickle
 
 #%%
 raw_data = read_data()
-df = textimport_light(raw_data, pandas_check = True)
+# df = textimport_light(raw_data, pandas_check = True)
+df = textimport(raw_data, pandas_check = True)
 text_IDs, text_uniques = remove_duplicates(df)
 df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 
 #%%
 start = time.time()
-batch_size = 100
-corpora = preprocessing_complete(text_uniques[0:batch_size])  
+# batch_size = 100
+# corpora = preprocessing_complete(text_uniques[0:batch_size])  
+corpora = preprocessing_complete(text_uniques)  
 
 with open('data/pos_tags_whole_text_4536.pkl', 'rb') as f:
     pos = pickle.load(f)
     
-num_pairs = int(batch_size/2)
+# num_pairs = int(batch_size/2)
+num_pairs = len(raw_data)
 end = time.time()
 
 print(f"Execution time was {end-start}s")
@@ -34,7 +37,7 @@ print(f"Execution time was {end-start}s")
 #%%
 
 def calls(corpora):                                           #9.5s / 100 texts
-    
+    start = time.time()
     # corpora[0] = no preprocessing
     asl = avg_sentence_length(corpora[0])                               #0.5s
     
@@ -45,8 +48,8 @@ def calls(corpora):                                           #9.5s / 100 texts
     liwc = LIWC(corpora[1])                                             #1.9s
     fl_kinc, avg_syll = readability_metrics(corpora[1])                 #1.45s
     ttr = TTR(corpora[1])                                               #0.1s
-    w_tg = tfidf_word_ngrams(corpora[1], 3,3)
-    c_tg = tfidf_char_ngrams(corpora[1], 3,3)
+    w_tg = tfidf_word_ngrams(corpora[1], 3,3, num_pairs)
+    c_tg = tfidf_char_ngrams(corpora[1], 3,3, num_pairs)
     i_o_c = index_of_coincidence(corpora[1])                            #0.06s
     
     # corpora[2] = stopwords removed
@@ -59,10 +62,14 @@ def calls(corpora):                                           #9.5s / 100 texts
     dgt = digits(corpora[3])
     
     #pos_tags as input
-    st = skipgramming(pos)
+    startSkip = time.time()
+    st = skipgramming(pos, num_pairs, False)
+    endSkip = time.time()
+    print(f"Execution time was {endSkip-startSkip}s")
     adj_adv = adj_adv_ratio(pos)
     si_t = simple_tense(pos)
-    
+    end = time.time()
+    print(f"Execution time was {end-start}s")
     #returns one list for float output, one for lists, and one where the output is already sim or cos
     return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt, adj_adv, i_o_c, fl_kinc, avg_syll))), list(zip(*(fwf, liwc, fwf, iw, ta, si_t))), list(zip(*(w_tg, c_tg, st)))
 
@@ -81,26 +88,37 @@ def arrays_combined(corpora):
     tagged_pairs_two = array_matrix[np.array(list(df['text_id'][:num_pairs]))]
     tagged_pairs_split = [p for p in tagged_pairs_two]
     
+    # missing index table!
+    
     cos = []
     
-    for pair in tagged_pairs_split:
+    for j, pair in enumerate(tagged_pairs_split):
         featuresFirst = [feature for feature in pair[0]]
         featuresSecond = [feature for feature in pair[1]]
-    
+        
+        cosTemp = []
+        
         for i, feature in enumerate(pair[0]):
             feature_vector_1 = np.array(featuresFirst[i]).reshape(1,-1)
             feature_vector_2 = np.array(featuresSecond[i]).reshape(1,-1)
-            cos.append(float(cosine(feature_vector_1, feature_vector_2)))
-    
-    cos_matrix = np.stack(np.array_split(np.array((cos)), num_pairs))
+            cosTemp.append(float(cosine(feature_vector_1, feature_vector_2)))
+        
+        cos.append(cosTemp)
+        
+    # cos_matrix = np.stack(np.array_split(np.array((cos)), num_pairs*2))
+    # cos_matrix = np.array_split(np.array((cos)), num_pairs-1)
     
     sim_matrix = np.stack(sims)
-    feature_matrix = np.hstack((distance_matrix, cos_matrix, sim_matrix))
+    feature_matrix = np.hstack((distance_matrix, cos, sim_matrix))
 
-    return feature_matrix
+    return feature_matrix #feature_matrix, cos, cos_matrix
+    # return distance_matrix, cos, sim_matrix
+
 
 #%%
 feature_matrix = arrays_combined(corpora)
-
+# distance_matrix, cos, sim_matrix = arrays_combined(corpora)
+# feature_matrix, cos, cos_matrix = arrays_combined(corpora)
+#%%
 with open('feature_matrix.pkl', 'wb') as f:
-     pickle.dump(feature_matrix,f)
+      pickle.dump(feature_matrix,f)
