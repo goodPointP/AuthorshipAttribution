@@ -22,7 +22,6 @@ df['text_id'] = pd.Series(zip(text_IDs[0::2], text_IDs[1::2]))
 start = time.time()
 batch_size = 100
 corpora = preprocessing_complete(text_uniques[0:batch_size])  
-# pos = pos_tag(batch_size) #for testing
 
 with open('data/pos_tags_whole_text_4536.pkl', 'rb') as f:
     pos = pickle.load(f)
@@ -102,3 +101,6 @@ def arrays_combined(corpora):
 
 #%%
 feature_matrix = arrays_combined(corpora)
+
+with open('feature_matrix.pkl', 'wb') as f:
+     pickle.dump(feature_matrix,f)

@@ -79,4 +79,4 @@ def skipgramming(tags, return_counts=False):
         pos_counts = [dict(Counter(text)) for text in tags]
         return cos, pos_counts
     else:
-        return np.stack(cos)
+        return np.stack([float(i) for i in cos])
