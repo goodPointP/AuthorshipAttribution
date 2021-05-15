@@ -31,7 +31,7 @@ lg = LogisticRegression()
 
 lg.fit(X_train, y_train)
 lg_pred = lg.predict(X_test)
-lg_acc = accuracy_score(y_test, lg_pred)
+lg_acc = metrics.accuracy_score(y_test, lg_pred)
 lg_auc = metrics.roc_auc_score(y_test, lg_pred)
 lg_rep = metrics.classification_report(y_test, lg_pred)
 
@@ -53,7 +53,7 @@ svm = SVC()
 
 svm.fit(X_train, y_train)
 svm_pred = svm.predict(X_test)
-svm_acc = accuracy_score(y_test, svm_pred)
+svm_acc = metrics.accuracy_score(y_test, svm_pred)
 svm_auc = metrics.roc_auc_score(y_test, svm_pred)
 svm_rep = metrics.classification_report(y_test, svm_pred)
 
@@ -75,7 +75,7 @@ rf = RandomForestClassifier()
 
 rf.fit(X_train, y_train)
 rf_pred = rf.predict(X_test)
-rf_acc = accuracy_score(y_test, rf_pred)
+rf_acc = metrics.accuracy_score(y_test, rf_pred)
 rf_auc = metrics.roc_auc_score(y_test, rf_pred)
 rf_rep = metrics.classification_report(y_test, rf_pred)
 
@@ -98,7 +98,7 @@ mlp = MLPClassifier()
 
 mlp.fit(X_train, y_train)
 mlp_pred = mlp.predict(X_test)
-mlp_acc = accuracy_score(y_test, mlp_pred)
+mlp_acc = metrics.accuracy_score(y_test, mlp_pred)
 mlp_auc = metrics.roc_auc_score(y_test, mlp_pred)
 mlp_rep = metrics.classification_report(y_test, mlp_pred)
 
