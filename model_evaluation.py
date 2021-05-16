@@ -15,7 +15,8 @@ with open('feature_matrix.pkl', 'rb') as f:
     feat_matrix = pickle.load(f)
 
 rawTruth = read_truth_data()
-truths = truthimport_light(rawTruth)
+#truths = truthimport_light(rawTruth)
+truths = truthimport(rawTruth)
 labels = truths['same'] 
 
 #%%
