@@ -1,5 +1,5 @@
-data/
 data/posTags.pkl
+data/posTags
 data/pan20-authorship-verification-training-small.jsonl
 data/pan20-authorship-verification-training-small-truth.jsonl
 data/intensifier_words.txt
