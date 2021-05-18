@@ -15,7 +15,6 @@ with open('feature_matrix.pkl', 'rb') as f:
     feat_matrix = pickle.load(f)
 
 rawTruth = read_truth_data()
-#truths = truthimport_light(rawTruth)
 truths = truthimport(rawTruth)
 labels = truths['same'] 
 
@@ -116,3 +115,16 @@ mlp_rep = metrics.classification_report(y_test, mlp_pred)
 #mlp_grid_result = mlp_grid_search.fit(X_test, y_test)
 
 #print("Best: %f using %" % (mlp_grid_result.best_score_, mlp_grid_result.best_params_))
+
+#%%#Leave-one_out method to see which features contribute 
+
+acc_scores = []
+for i in range(len(feat_matrix.T)):
+    print(i)
+    lg_i = LogisticRegression()
+    X_train_i = np.delete(X_train, obj = i, axis = 1 )
+    X_test_i = np.delete(X_test, obj = i, axis = 1 )
+    lg_i.fit(X_train_i, y_train)
+    lg_pred_i = lg_i.predict(X_test_i)
+    lg_acc_i = metrics.accuracy_score(y_test, lg_pred_i)
+    acc_scores.append(lg_acc_i)
