@@ -71,7 +71,7 @@ def calls(corpora):                                           #9.5s / 100 texts
     end = time.time()
     print(f"Execution time was {end-start}s")
     #returns one list for float output, one for lists, and one where the output is already sim or cos
-    return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt, adj_adv, i_o_c, fl_kinc, avg_syll))), list(zip(*(fwf, liwc, fwf, iw, ta, si_t))), list(zip(*(w_tg, c_tg, st)))
+    return list(zip(*(asl, awl, fws, hl, ttr, pr, sc, dgt, adj_adv, i_o_c, fl_kinc, avg_syll))), list(zip(*(liwc, fwf, iw, ta, si_t))), list(zip(*(w_tg, c_tg, st)))
 
 
 #%% 26.5s for 100 texts...
