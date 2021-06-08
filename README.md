@@ -1,1 +1,3 @@
-# Authorship Attribution Project for Language Processing 2
+# Authorship Attribution
+## Language Processing 2
+###University of Copenhagen
