@@ -38,19 +38,6 @@ lg_acc = metrics.accuracy_score(y_test, lg_pred)
 lg_auc = metrics.roc_auc_score(y_test, lg_pred)
 lg_rep = metrics.classification_report(y_test, lg_pred)
 
-# '''Hyperparameter tuning - uncomment lines below to run'''
-
-# solvers = ['newton-cg', 'lbfgs', 'liblinear']
-# penalty = ['l2']
-# c_values = [1000, 500, 100, 50, 10, 5, 1.0, 0.1, 0.01, 0.001]
-
-# lg_grid = dict(solver=solvers,penalty=penalty,C=c_values)
-# lg_grid_search = GridSearchCV(estimator=lg, param_grid=lg_grid, n_jobs=-1, cv=cv, scoring='accuracy',error_score=0)
-# lg_grid_result = lg_grid_search.fit(X_test, y_test)
-
-# print("Best: %f using %s" % (lg_grid_result.best_score_, lg_grid_result.best_params_))
-# results.append(("LG:", (lg_grid_result.best_score_, lg_grid_result.best_params_)))
-
 #%%
 svm = SVC(C=5, gamma=0.01, kernel='rbf')
 #svm = SVC()
@@ -61,18 +48,6 @@ svm_acc = metrics.accuracy_score(y_test, svm_pred)
 svm_auc = metrics.roc_auc_score(y_test, svm_pred)
 svm_rep = metrics.classification_report(y_test, svm_pred)
 
-# '''Hyperparameter tuning - uncomment lines below to run'''
-
-# kernel_values = ['rbf', 'poly', 'sigmoid']
-# gammas = [0.001, 0.01, 0.1, 1]
-# c_values =  [1000, 500, 100, 50, 10, 5, 1.0, 0.1, 0.01, 0.001]
-
-# svm_grid = dict(kernel = kernel_values, gamma = gammas, C = c_values)
-# svm_grid_search = GridSearchCV(estimator=svm, param_grid=svm_grid, n_jobs=-1, cv=cv, scoring='accuracy',error_score=0)
-# svm_grid_result = svm_grid_search.fit(X_test, y_test)
-
-# print("Best: %f using %s" % (svm_grid_result.best_score_, svm_grid_result.best_params_))
-# results.append(("SVM:", (svm_grid_result.best_score_, svm_grid_result.best_params_)))
 #%%
 
 rf = RandomForestClassifier(max_depth=90, max_features=2, min_samples_leaf=3, min_samples_split=10, n_estimators=200)
@@ -84,22 +59,6 @@ rf_acc = metrics.accuracy_score(y_test, rf_pred)
 rf_auc = metrics.roc_auc_score(y_test, rf_pred)
 rf_rep = metrics.classification_report(y_test, rf_pred)
 
-# '''WARNING - THIS ONE TAKES AN ETERNITY'''
-
-# rf_grid = {
-#     'max_depth': [80, 90,],
-#     'max_features': [2, 3],
-#     'min_samples_leaf': [3, 4],
-#     'min_samples_split': [8, 10],
-#     'n_estimators': [100, 200]}
-
-# rf_grid_search = GridSearchCV(estimator=rf, param_grid=rf_grid, n_jobs=-1, cv=cv, scoring='accuracy',error_score=0)
-# rf_grid_result = rf_grid_search.fit(X_test, y_test)
-
-# print("Best: %f using %s" % (rf_grid_result.best_score_, rf_grid_result.best_params_))
-# results.append(("RF:", (rf_grid_result.best_score_, rf_grid_result.best_params_)))
-
-
 #%%
 mlp = MLPClassifier(activation='relu', alpha=0.0001, hidden_layer_sizes=(100,), learning_rate='constant', solver='adam', max_iter=1000)
 #mlp = MLPClassifier(max_iter=1000)
@@ -109,21 +68,6 @@ mlp_pred = mlp.predict(X_test)
 mlp_acc = metrics.accuracy_score(y_test, mlp_pred)
 mlp_auc = metrics.roc_auc_score(y_test, mlp_pred)
 mlp_rep = metrics.classification_report(y_test, mlp_pred)
-
-# '''WARNING - THIS ONE TAKES AN ETERNITY'''
-
-# mlp_grid = {
-#     'hidden_layer_sizes': [(10,30,10),(20,),(100,),(50,100,10)],
-#     'activation': ['tanh', 'relu'],
-#     'solver': ['sgd', 'adam'],
-#     'alpha': [0.0001, 0.05],
-#     'learning_rate': ['constant','adaptive']}
-
-# mlp_grid_search = GridSearchCV(estimator=mlp, param_grid=mlp_grid, n_jobs=-1, cv=cv, scoring='accuracy',error_score=0)
-# mlp_grid_result = mlp_grid_search.fit(X_test, y_test)
-
-# print("Best: %f using %s" % (mlp_grid_result.best_score_, mlp_grid_result.best_params_))
-# results.append(("MLP:", (mlp_grid_result.best_score_, mlp_grid_result.best_params_)))
 
 #%%#Leave-one_out method to see which features contribute 
 
